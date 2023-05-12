@@ -11,6 +11,27 @@ class Player:
         self.attack_power += 1
         print("Level Up! Your attack power increased to", self.attack_power)
 
+    def attack(self, enemy):
+        print("Player attacks the enemy!")
+        enemy.health -= self.attack_power
+
+    def is_defeated(self):
+        return self.health <= 0
+
+
+class Enemy:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.health = 2
+
+    def attack(self, player):
+        print("Enemy attacks the player!")
+        player.health -= 1
+
+    def is_defeated(self):
+        return self.health <= 0
+
 
 class Game:
     def __init__(self, map_size):
@@ -39,7 +60,7 @@ class Game:
                 y = random.randint(0, self.map_size - 1)
                 if self.map[x][y] == '-':
                     self.map[x][y] = 'E'
-                    self.enemies.append((x, y))
+                    self.enemies.append(Enemy(x, y))
                     break
 
     def print_map(self):
@@ -67,40 +88,44 @@ class Game:
 
     def encounter_enemy(self, x, y):
         print("Enemy encountered!")
-        self.attack_enemy(x, y)
+        enemy = self.get_enemy_at(x, y)
+        self.attack_enemy(enemy)
+        if not enemy.is_defeated():
+            self.attack_player(enemy)
 
-    def attack_enemy(self, x, y):
-        enemy_index = self.enemies.index((x, y))
-        enemy = self.enemies.pop(enemy_index)
+    def get_enemy_at(self, x, y):
+        for enemy in self.enemies:
+            if enemy.x == x and enemy.y == y:
+                return enemy
+        return None
 
-        while True:
-            print("1. Physical Attack")
-            print("2. Defend")
-            print("3. Magic Attack")
-            choice = input("Choose your action (1-3): ")
-            if choice == "1":
-                self.physical_attack(enemy)
-                break
-            elif choice == "2":
-                self.defend()
-                break
-            elif choice == "3":
-                self.magic_attack(enemy)
-                break
-            else:
-                print("Invalid choice! Please try again.")
+    def attack_enemy(self, enemy):
+        self.player.attack(enemy)
+        if enemy.is_defeated():
+            self.defeat_enemy(enemy)
 
-    def physical_attack(self, enemy):
-        self.map[enemy[0]][enemy[1]] = '-'
+    def defeat_enemy(self, enemy):
+        self.map[enemy.x][enemy.y] = '-'
+        self.enemies.remove(enemy)
         print("You defeated an enemy!")
-        self.player.level_up()
+        if enemy.x == self.player_position[0] and enemy.y == self.player_position[1]:
+            self.map[self.player_position[0]][self.player_position[1]] = '-'
 
-    def defend(self):
-        print("You defended against the enemy's attack!")
-        # Apply any defensive effects or calculations here
+    def attack_player(self, enemy):
+        if enemy.x == self.player_position[0]:
+            if enemy.y < self.player_position[1]:
+                self.player.attack(enemy)
+            else:
+                self.attack_player_from_behind(enemy)
+        elif enemy.y == self.player_position[1]:
+            if enemy.x < self.player_position[0]:
+                self.player.attack(enemy)
+            else:
+                self.attack_player_from_behind(enemy)
 
-    def magic_attack(self, enemy):
-        print("Magic attack against an enemy is not implemented yet!")
+    def attack_player_from_behind(self, enemy):
+        print("Enemy attacks the player from behind!")
+        self.player.health -= 1
 
     def run_game(self):
         while not self.game_over:
@@ -113,10 +138,13 @@ class Game:
 
             if not self.enemies:
                 self.game_over = True
+            elif self.player.is_defeated():
+                self.game_over()
 
-    def game_over(self):
-        print("Game Over")
-        self.game_over = True
+        if self.game_over:
+            print("Congratulations! You cleared the game!")
+        else:
+            print("Game Over")
 
 # ゲームの開始
 map_size = 10  # マップサイズを設定
