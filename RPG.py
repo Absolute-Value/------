@@ -202,10 +202,14 @@ class Game:
             and new_y < self.map_size
             and self.map[new_y][new_x] != "#"
         ):
-            self.map[self.player.y][self.player.x] = "."
-            self.player.x = new_x
-            self.player.y = new_y
-            self.map[self.player.y][self.player.x] = "P"
+            if self.map[new_y][new_x] == "E" or self.map[new_y][new_x] == "B":
+                # 敵がいる場合、バトルを開始する
+                self.encounter_enemy(new_x, new_y)
+            else:
+                self.map[self.player.y][self.player.x] = "."
+                self.player.x = new_x
+                self.player.y = new_y
+                self.map[self.player.y][self.player.x] = "P"
 
     def encounter_enemy(self, x, y):
         for enemy in self.enemies:
