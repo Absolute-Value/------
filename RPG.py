@@ -23,9 +23,6 @@ class Game:
         self.window = pygame.display.set_mode((self.window_size[0], self.window_size[1]))
         pygame.display.set_caption('RPG Game')
 
-        self.entity_map[self.player.y][self.player.x] = 1
-        for enemy in self.enemies:
-            self.entity_map[enemy.y][enemy.x] = 2
         self.entity_map[self.boss_position[1]][self.boss_position[0]] = 3  # ボスの位置をマップに反映
 
         # 使用する画像を読み込んでおく
@@ -41,6 +38,7 @@ class Game:
             x = random.randint(0, self.map_size[0] - 1)
             y = random.randint(0, self.map_size[1] - 1)
             if self.entity_map[y][x] == 0 and self.map[y][x] == 0:
+                self.entity_map[y][x] = 2
                 return x, y
 
     def generate_enemies_positions(self):
