@@ -17,6 +17,15 @@ class Enemy:
         self.x = x
         self.y = y
 
+    def move(self, player_position):
+        dx = player_position[0] - self.x
+        dy = player_position[1] - self.y
+
+        if dx != 0:
+            self.x += dx // abs(dx)
+        if dy != 0:
+            self.y += dy // abs(dy)
+
 class Boss:
     def __init__(self, x, y):
         self.health = 10
@@ -33,31 +42,40 @@ class Game:
         self.boss = None
         self.generate_enemies()
         self.generate_boss()
+        self.place_entities()
 
     def generate_enemies(self):
-        for _ in range(self.map_size // 2):
-            x = random.randint(0, self.map_size - 1)
-            y = random.randint(0, self.map_size - 1)
-            enemy = Enemy(x, y)
-            self.enemies.append(enemy)
+        for _ in range(5):
+            while True:
+                x = random.randint(0, self.map_size - 1)
+                y = random.randint(0, self.map_size - 1)
+                if self.map[x][y] == "-" and (x, y) != self.player_position:
+                    enemy = Enemy(x, y)
+                    self.enemies.append(enemy)
+                    break
 
     def generate_boss(self):
-        x = random.randint(0, self.map_size - 1)
-        y = random.randint(0, self.map_size - 1)
-        self.boss = Boss(x, y)
+        while True:
+            x = random.randint(0, self.map_size - 1)
+            y = random.randint(0, self.map_size - 1)
+            if self.map[x][y] == "-" and (x, y) != self.player_position:
+                self.boss = Boss(x, y)
+                break
+
+    def place_entities(self):
+        self.map[self.player_position[0]][self.player_position[1]] = "P"
+        for enemy in self.enemies:
+            self.map[enemy.x][enemy.y] = "E"
+        if self.boss:
+            self.map[self.boss.x][self.boss.y] = "B"
 
     def print_map(self):
         for i in range(self.map_size):
             for j in range(self.map_size):
-                if (i, j) == self.player_position:
-                    print("P", end=" ")
-                elif any(enemy.x == i and enemy.y == j for enemy in self.enemies):
-                    print("E", end=" ")
-                elif self.boss and self.boss.x == i and self.boss.y == j:
-                    print("B", end=" ")
-                else:
-                    print(self.map[i][j], end=" ")
+                print(self.map[i][j], end=" ")
             print()
+        print("Player HP:", self.player.health)
+        print("Player Level:", self.player.level)
 
     def move_player(self, direction):
         x, y = self.player_position
@@ -82,63 +100,62 @@ class Game:
     def check_encounter(self):
         x, y = self.player_position
 
+        # Check if the player encounters an enemy
         for enemy in self.enemies:
             if enemy.x == x and enemy.y == y:
-                print("Enemy encountered!")
                 self.attack_enemy(enemy)
+                break
 
+        # Check if the player encounters the boss
         if self.boss and self.boss.x == x and self.boss.y == y:
-            print("Boss encountered!")
             self.attack_boss()
 
     def attack_enemy(self, enemy):
-        while enemy.health > 0 and self.player.health > 0:
-            command = input("Press space to attack: ")
-            if command == " ":
-                enemy.health -= self.player.attack_power
-                if enemy.health > 0:
-                    print("Enemy's health:", enemy.health)
-                    self.player.health -= 1
-                    print("Player's health:", self.player.health)
-                else:
-                    print("Enemy defeated!")
-                    self.map[enemy.x][enemy.y] = "-"
-                    self.enemies.remove(enemy)
-                    self.player.level_up()
-                    break
+        while True:
+            print("Enemy encountered!")
+            print("1. Physical Attack")
+            print("2. Defend")
+            print("3. Magic Attack")
+            choice = input("Choose your action (1-3): ")
+            if choice == "1":
+                self.physical_attack_enemy(enemy)
+                break
+            elif choice == "2":
+                self.defend()
+                break
+            elif choice == "3":
+                self.magic_attack_enemy(enemy)
+                break
             else:
-                print("Invalid command!")
+                print("Invalid choice! Please try again.")
 
-        if self.player.health == 0:
-            print("Game over!")
+    def physical_attack_enemy(self, enemy):
+        enemy.health -= self.player.attack_power
+
+        if enemy.health <= 0:
+            self.enemies.remove(enemy)
+            print("You defeated an enemy!")
+            self.player.level_up()
+        else:
+            print("You attacked an enemy. Enemy's health:", enemy.health)
+
+    def defend(self):
+        print("You defended against the enemy's attack!")
+        # Apply any defensive effects or calculations here
+
+    def magic_attack_enemy(self, enemy):
+        # Implement the logic for magic attack here
+        # This can include consuming mana, dealing magical damage, etc.
+        print("Magic attack is not implemented yet!")
 
     def attack_boss(self):
-        attack_count = 0
-        while attack_count < 10 and self.boss and self.boss.health > 0 and self.player.health > 0:
-            command = input("Press space to attack: ")
-            if command == " ":
-                self.boss.health -= self.player.attack_power
-                attack_count += 1
-                if self.boss.health > 0:
-                    print("Boss's health:", self.boss.health)
-                    self.player.health -= 1
-                    print("Player's health:", self.player.health)
-                else:
-                    print("Boss defeated!")
-                    self.map[self.boss.x][self.boss.y] = "-"
-                    self.boss = None
-                    print("Game cleared!")
-                    break
-            else:
-                print("Invalid command!")
+        self.boss.health -= self.player.attack_power
 
-        if attack_count >= 10 and self.player.health > 0:
-            print("Boss cannot be defeated!")
-
-    def level_up(self):
-        self.player.level += 1
-        self.player.attack_power += 1
-        print("Level up! Player's level is now", self.player.level)
+        if self.boss.health <= 0:
+            print("Congratulations! You defeated the boss!")
+            self.player.level_up()
+        else:
+            print("You attacked the boss. Boss's health:", self.boss.health)
 
 map_size = 5  # マップサイズを設定
 game = Game(map_size)
