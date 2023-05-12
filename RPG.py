@@ -25,20 +25,14 @@ class Player:
         self.game_map = game_map
         self.game_map[self.y][self.x] = "P"
 
-    def encounter_enemy(self, x, y):
-        for enemy in self.enemies:
-            if enemy.x == x and enemy.y == y:
-                print("Encountered an enemy!")
-                self.battle(enemy)
-
     def attack(self, enemy):
         enemy.health -= self.attack_power
-        return f"Attacked {self.attack_power}"
+        return f"Player did {self.attack_power} damage to {enemy.name} ."
 
     def take_damage(self, damage):
         self.health -= damage
         if self.health <= 0:
-            print("Player defeated! Game over.")
+            print("Player was killed ! Game over .")
             self.game_over = True
 
     def gain_experience(self, experience):
@@ -52,7 +46,7 @@ class Player:
         self.health = self.max_health
         self.experience -= self.experience_to_level_up
         self.experience_to_level_up *= 2
-        print(f"Player leveled up!({self.level-1}->{self.level}) ")
+        print(f"Player leveled up! ({self.level-1}->{self.level}) ")
         print("HP increased and fully healed.")
 
 class Enemy:
@@ -61,13 +55,14 @@ class Enemy:
         self.y = y
         self.health = health
         self.attack_power = attack_power
+        self.name = "Bone"
 
     def attack(self, player):
         if player.defense:
             return "Player defended the attack!"
         else:
             player.take_damage(self.attack_power)
-            return f"Damaged {self.attack_power}"
+            return f"{self.name} did {self.attack_power} damage to player!"
 
     def take_damage(self, damage):
         self.health -= damage
@@ -75,6 +70,7 @@ class Enemy:
 class Boss(Enemy):
     def __init__(self, x, y, health=5, attack_power=3):
         super().__init__(x, y, health, attack_power)
+        self.name = "BoneKing"
 
 class Game:
     def __init__(self, map_size):
@@ -88,7 +84,7 @@ class Game:
         pygame.init()
         # ゲームウィンドウの作成
         self.window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        pygame.display.set_caption('Battle Game')
+        pygame.display.set_caption('RPG Game')
 
         self.map[self.player.y][self.player.x] = "P"
         for enemy in self.enemies:
@@ -162,7 +158,7 @@ class Game:
             self.player.y = new_y
             self.map[self.player.y][self.player.x] = "P"
         else:
-            print("You can't move there. Try again.")
+            print("You can't move there . Try again .")
 
 
     def encounter_enemy(self, x, y):
@@ -172,7 +168,7 @@ class Game:
 
     def battle(self, enemy):
         self.current_enemy = enemy
-        self.states = ["Battle start !"]
+        self.states = [f"{enemy.name} showed up !"]
         while self.player.health > 0 and enemy.health > 0:
             self.print_map()
             self.print_battle()
@@ -204,7 +200,7 @@ class Game:
             self.player.gain_experience(10)
             self.enemies.remove(enemy)
             self.map[enemy.y][enemy.x] = "-"  # マップ上から敵を削除
-            self.states.append("Killed")
+            self.states.append(f"Player killed {enemy.name} .")
             # pygame.display.update()
 
     def print_battle(self):
@@ -217,9 +213,9 @@ class Game:
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(status_left, status_top, status_width, status_height), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_left, status_top, status_width, status_height), 2)
         status_text = [
-            f"Lv: {self.player.level} ({self.player.experience}/{self.player.experience_to_level_up})",
-            f"HP: {self.player.health}/{self.player.max_health}",
-            f"E : {self.player.experience}"
+            f"Lv.: {self.player.level}",
+            f"HP : {self.player.health}/{self.player.max_health}",
+            f"Exp: {self.player.experience}/{self.player.experience_to_level_up}"
         ]
         for i, text in enumerate(status_text):
             self.draw_text(text, status_left + 10, status_top + 10 + i * 20, color=WHITE_COLOR)
