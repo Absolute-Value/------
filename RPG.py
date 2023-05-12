@@ -29,7 +29,8 @@ class Player:
         print(f"You attacked the enemy and dealt {self.attack_power} damage.")
 
     def defend(self):
-        pass
+        self.defense_power = 2
+        print("Player is defending. Defense power increased.")
 
     def take_damage(self, damage):
         self.health -= damage
@@ -58,7 +59,10 @@ class Enemy:
         self.attack_power = attack_power
 
     def attack(self, player):
-        player.take_damage(self.attack_power)
+        if player.defense_power > 1:
+            print("Player defended the attack!")
+        else:
+            player.take_damage(self.attack_power)
 
     def take_damage(self, damage):
         self.health -= damage
@@ -149,8 +153,7 @@ class Game:
 
     def battle(self, enemy):
         while self.player.health > 0 and enemy.health > 0:
-            self.player.print_status()
-            self.print_map()
+            self.print_map_with_status()
             print("Player HP:", self.player.health)
             print("Enemy HP:", enemy.health)
 
