@@ -13,13 +13,6 @@ ENEMY_COLOR = (255, 165, 0)  # 敵の色 (オレンジ)
 BOSS_COLOR = (255, 0, 0)  # ボスの色 (赤)
 EMPTY_COLOR = (255, 255, 255)  # 空白セルの色 (白)
 
-# Pygameの初期化
-pygame.init()
-# ゲームウィンドウの作成
-window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-# タイトルバーに表示するゲームのタイトル
-pygame.display.set_caption("RPG Game")
-
 class Player:
     def __init__(self, x, y, game_map):
         self.x = x
@@ -32,13 +25,6 @@ class Player:
         self.experience = 0
         self.experience_to_level_up = 20
         self.game_map = game_map
-
-    def print_status(self):
-        print("Player Status:")
-        print("Level:", self.level)
-        print("HP:", self.health, "/", self.max_health)
-        print("Experience:", self.experience, "/", self.experience_to_level_up)
-        print()
 
     def move(self, dx, dy):
         new_x = self.x + dx
@@ -70,7 +56,6 @@ class Player:
 
     def attack(self, enemy):
         enemy.health -= self.attack_power
-        print(f"You attacked the enemy and dealt {self.attack_power} damage.")
 
     def defend(self):
         self.defense_power = 2
@@ -124,6 +109,10 @@ class Game:
         self.boss_position = random.choice(self.enemies_positions)
         self.enemies = self.generate_enemies()
         self.game_over = False
+        pygame.init()
+        # ゲームウィンドウの作成
+        self.window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        pygame.display.set_caption('Battle Game')
 
         self.map[self.player.y][self.player.x] = "P"
         for enemy in self.enemies:
@@ -182,14 +171,17 @@ class Game:
                             cell_color = ENEMY_COLOR
                             break
 
-                pygame.draw.rect(window, cell_color, cell_rect)
-
-        # プレイヤーのステータスを表示
-        self.draw_text(f"HP: {self.player.health}/{self.player.max_health}", 10, 10)
-        self.draw_text(f"Level: {self.player.level}", 10, 40)
-        self.draw_text(f"Experience: {self.player.experience}/{self.player.experience_to_level_up}", 10, 70)
-
+                pygame.draw.rect(self.window, cell_color, cell_rect)
+        
         pygame.display.flip()
+
+    def print_status(self):
+        status_text = [
+            f"HP: {self.player.health}/{self.player.max_health} ({self.player.experience}/{self.player.experience_to_level_up})",
+            f"Lv: {self.player.level}"
+        ]
+        for i, text in enumerate(status_text):
+            self.draw_text(text, 10, 10 + i * 30)
 
     def player_move(self, dx, dy):
         new_x = self.player.x + dx
@@ -214,51 +206,54 @@ class Game:
     def encounter_enemy(self, x, y):
         for enemy in self.enemies:
             if enemy.x == x and enemy.y == y:
-                print("Encountered an enemy!")
                 self.battle(enemy)
 
     def battle(self, enemy):
+        self.current_enemy = enemy
         while self.player.health > 0 and enemy.health > 0:
             self.print_map()
-            print("Player HP:", self.player.health)
-            print("Enemy HP:", enemy.health)
+            self.print_status()
+
+            pygame.display.update()
 
             # プレイヤーのターン
-            print("Player's turn:")
-            command = input("Enter 'a' for attack or 'd' for defense: ")
-            if command == "a":
-                self.player.attack(enemy)
-            elif command == "d":
-                self.player.defend()
-            else:
-                print("Invalid command!")
+            command_entered = False
+            while not command_entered:
+                self.handle_events()
+                keys = pygame.key.get_pressed()
+                if keys[K_a]:
+                    self.player.attack(enemy)
+                    command_entered = True
+                if keys[K_d]:
+                    self.player.defend()
+                    command_entered = True
 
             # 敵のターン
-            print("Enemy's turn:")
             enemy.attack(self.player)
 
         if self.player.health <= 0:
-            print("Player defeated! Game over.")
+            pygame.display.update()
             self.game_over = True
         else:
-            print("Enemy defeated!")
             self.player.gain_experience(10)
             self.enemies.remove(enemy)
             self.map[enemy.y][enemy.x] = "-"  # マップ上から敵を削除
-
-    def run_game(self):
-        while not self.game_over:
-            self.handle_events()
-            self.print_map()
-
-        pygame.quit()
+            pygame.display.update()
 
     def draw_text(self, text, x, y, font_size=24, color=(0, 0, 0)):
         font = pygame.font.Font(None, font_size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
         text_rect.topleft = (x, y)
-        window.blit(text_surface, text_rect)
+        self.window.blit(text_surface, text_rect)
+
+    def run_game(self):
+        while not self.game_over:
+            self.handle_events()
+            self.print_map()
+            pygame.display.update()
+
+        pygame.quit()
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -276,6 +271,10 @@ class Game:
                     self.player_move(-1, 0)
                 if event.key == K_RIGHT:
                     self.player_move(1, 0)
+                if event.key == K_a:
+                    self.player.attack(self.current_enemy)
+                if event.key == K_d:
+                    self.player.defend()
 
 game = Game(10)  # 10x10のマップを作成
 game.run_game()
