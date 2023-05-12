@@ -2,149 +2,126 @@ import random
 
 class Player:
     def __init__(self):
+        self.x = 0
+        self.y = 0
         self.health = 5
         self.attack_power = 1
-        self.level = 1
 
-    def level_up(self):
-        self.level += 1
-        self.attack_power += 1
-        print("Level Up! Your attack power increased to", self.attack_power)
+    def move(self, dx, dy):
+        self.x += dx
+        self.y += dy
 
     def attack(self, enemy):
-        print("Player attacks the enemy!")
-        enemy.health -= self.attack_power
+        enemy.take_damage(self.attack_power)
 
-    def is_defeated(self):
-        return self.health <= 0
-
+    def take_damage(self, damage):
+        self.health -= damage
 
 class Enemy:
     def __init__(self, x, y):
         self.x = x
         self.y = y
         self.health = 2
+        self.attack_power = 1
 
     def attack(self, player):
-        print("Enemy attacks the player!")
-        player.health -= 1
+        player.take_damage(self.attack_power)
 
-    def is_defeated(self):
-        return self.health <= 0
-
+    def take_damage(self, damage):
+        self.health -= damage
 
 class Game:
     def __init__(self, map_size):
         self.map_size = map_size
-        self.map = [['-' for _ in range(self.map_size)] for _ in range(self.map_size)]
+        self.map = self.generate_map()
         self.player = Player()
-        self.player_position = None
-        self.enemies = []
-        self.place_entities()
+        self.enemies = self.generate_enemies()
         self.game_over = False
 
-    def place_entities(self):
-        self.place_player()
-        self.place_enemies()
-
-    def place_player(self):
-        x = random.randint(0, self.map_size - 1)
-        y = random.randint(0, self.map_size - 1)
-        self.player_position = (x, y)
-        self.map[x][y] = 'P'
-
-    def place_enemies(self):
-        for _ in range(5):
-            while True:
-                x = random.randint(0, self.map_size - 1)
-                y = random.randint(0, self.map_size - 1)
-                if self.map[x][y] == '-':
-                    self.map[x][y] = 'E'
-                    self.enemies.append(Enemy(x, y))
-                    break
+    def generate_map(self):
+        map = [["-" for _ in range(self.map_size)] for _ in range(self.map_size)]
+        return map
 
     def print_map(self):
         for row in self.map:
-            print(' '.join(row))
+            print(" ".join(row))
 
-    def move_player(self, direction):
-        x, y = self.player_position
+    def generate_enemies(self):
+        enemies = []
+        for _ in range(5):
+            x = random.randint(0, self.map_size - 1)
+            y = random.randint(0, self.map_size - 1)
+            enemy = Enemy(x, y)
+            enemies.append(enemy)
+        return enemies
 
-        if direction == 'w' and x > 0:
-            x -= 1
-        elif direction == 's' and x < self.map_size - 1:
-            x += 1
-        elif direction == 'a' and y > 0:
-            y -= 1
-        elif direction == 'd' and y < self.map_size - 1:
-            y += 1
+    def move_player(self, dx, dy):
+        new_x = self.player.x + dx
+        new_y = self.player.y + dy
 
-        if self.map[x][y] == 'E':
-            self.encounter_enemy(x, y)
-        elif self.map[x][y] == '-':
-            self.map[self.player_position[0]][self.player_position[1]] = '-'
-            self.player_position = (x, y)
-            self.map[x][y] = 'P'
+        if self.is_valid_move(new_x, new_y):
+            self.map[self.player.x][self.player.y] = "-"
+            self.player.move(dx, dy)
+            self.map[self.player.x][self.player.y] = "P"
 
-    def encounter_enemy(self, x, y):
-        print("Enemy encountered!")
-        enemy = self.get_enemy_at(x, y)
-        self.attack_enemy(enemy)
-        if not enemy.is_defeated():
-            self.attack_player(enemy)
+    def is_valid_move(self, x, y):
+        return 0 <= x < self.map_size and 0 <= y < self.map_size
 
-    def get_enemy_at(self, x, y):
+    def encounter_enemy(self):
         for enemy in self.enemies:
-            if enemy.x == x and enemy.y == y:
-                return enemy
-        return None
+            if enemy.x == self.player.x and enemy.y == self.player.y:
+                self.battle(enemy)
+                break
 
-    def attack_enemy(self, enemy):
-        self.player.attack(enemy)
-        if enemy.is_defeated():
-            self.defeat_enemy(enemy)
+    def battle(self, enemy):
+        print("Encountered an enemy!")
+        print(f"Player HP: {self.player.health}")
+        print(f"Enemy HP: {enemy.health}")
 
-    def defeat_enemy(self, enemy):
-        self.map[enemy.x][enemy.y] = '-'
-        self.enemies.remove(enemy)
-        print("You defeated an enemy!")
-        if enemy.x == self.player_position[0] and enemy.y == self.player_position[1]:
-            self.map[self.player_position[0]][self.player_position[1]] = '-'
-
-    def attack_player(self, enemy):
-        if enemy.x == self.player_position[0]:
-            if enemy.y < self.player_position[1]:
+        while self.player.health > 0 and enemy.health > 0:
+            command = input("Enter 'a' to attack or 'd' to defend: ")
+            if command == "a":
                 self.player.attack(enemy)
+                if enemy.health > 0:
+                    enemy.attack(self.player)
+            elif command == "d":
+                enemy.attack(self.player)
             else:
-                self.attack_player_from_behind(enemy)
-        elif enemy.y == self.player_position[1]:
-            if enemy.x < self.player_position[0]:
-                self.player.attack(enemy)
-            else:
-                self.attack_player_from_behind(enemy)
+                print("Invalid command!")
 
-    def attack_player_from_behind(self, enemy):
-        print("Enemy attacks the player from behind!")
-        self.player.health -= 1
+            print(f"Player HP: {self.player.health}")
+            print(f"Enemy HP: {enemy.health}")
+
+        if self.player.health <= 0:
+            self.game_over = True
+            print("Game Over!")
+        else:
+            self.enemies.remove(enemy)
+            print("Enemy defeated!")
 
     def run_game(self):
         while not self.game_over:
             self.print_map()
-            command = input("Press 'w' to move up, 's' to move down, 'a' to move left, 'd' to move right: ")
-            if command in ["w", "s", "a", "d"]:
-                self.move_player(command)
+            self.encounter_enemy()
+            command = input("Enter 'w' to move up, 's' to move down, 'a' to move left, 'd' to move right: ")
+            if command == "w":
+                self.move_player(-1, 0)
+            elif command == "s":
+                self.move_player(1, 0)
+            elif command == "a":
+                self.move_player(0, -1)
+            elif command == "d":
+                self.move_player(0, 1)
             else:
                 print("Invalid command!")
 
-            if not self.enemies:
-                self.game_over = True
-            elif self.player.is_defeated():
-                self.game_over()
+            print()  # 改行
 
-        if self.game_over:
-            print("Congratulations! You cleared the game!")
-        else:
-            print("Game Over")
+    def play_game(self):
+        print("Game Start!")
+        self.run_game()
+        print("Game Over")
+
 
 # ゲームの開始
 map_size = 10  # マップサイズを設定
