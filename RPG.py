@@ -8,10 +8,10 @@ WINDOW_HEIGHT = 600
 
 # マップのセルのサイズと色
 CELL_SIZE = 50
-PLAYER_COLOR = (0, 255, 0)  # プレイヤーの色 (緑)
+PLAYER_COLOR = (0, 0, 255)  # プレイヤーの色 (緑)
 ENEMY_COLOR = (255, 165, 0)  # 敵の色 (オレンジ)
 BOSS_COLOR = (255, 0, 0)  # ボスの色 (赤)
-EMPTY_COLOR = (255, 255, 255)  # 空白セルの色 (白)
+EMPTY_COLOR = (100, 255, 100)  # 空白セルの色 (白)
 
 class Player:
     def __init__(self, x, y, game_map):
