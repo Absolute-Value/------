@@ -116,6 +116,12 @@ class Game:
         for enemy in self.enemies:
             self.map[enemy.y][enemy.x] = "E"
         self.map[self.boss_position[1]][self.boss_position[0]] = "B"  # ボスの位置をマップに反映
+
+        # 使用する画像を読み込んでおく
+        self.bg_image = pygame.transform.scale(pygame.image.load("bg.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.player_image = pygame.transform.scale(pygame.image.load("player.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.enemy_image = pygame.transform.scale(pygame.image.load("enemy.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.boss_image = pygame.transform.scale(pygame.image.load("boss.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
         
     def get_random_empty_position(self):
         while True:
@@ -151,16 +157,13 @@ class Game:
             for x, map_tile in enumerate(map_row):
                 cell_rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
                 if map_tile == "P":
-                    image = pygame.image.load("player.png")  # プレイヤー画像の読み込み
+                    self.window.blit(self.player_image, cell_rect) # プレイヤー画像をブリット
                 elif map_tile == "E":
-                    image = pygame.image.load("enemy.png")  # 画像の読み込み
+                    self.window.blit(self.enemy_image, cell_rect) # 画像をブリット
                 elif map_tile == "B":
-                    image = pygame.image.load("boss.png")  # 画像の読み込み
+                    self.window.blit(self.boss_image, cell_rect) # 画像をブリット
                 else:
-                    image = pygame.image.load("bg.png")  # 画像の読み込み
-
-                image = pygame.transform.scale(image, (CELL_SIZE, CELL_SIZE))  # セルサイズにリサイズ
-                self.window.blit(image, cell_rect) # プレイヤー画像をブリット
+                    self.window.blit(self.bg_image, cell_rect) # 画像をブリット
                 
         pygame.display.flip()
 
