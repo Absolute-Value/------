@@ -156,14 +156,13 @@ class Game:
         for y, map_row in enumerate(self.map):
             for x, map_tile in enumerate(map_row):
                 cell_rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+                self.window.blit(self.bg_image, cell_rect) # 画像をブリット
                 if map_tile == "P":
                     self.window.blit(self.player_image, cell_rect) # プレイヤー画像をブリット
                 elif map_tile == "E":
                     self.window.blit(self.enemy_image, cell_rect) # 画像をブリット
                 elif map_tile == "B":
                     self.window.blit(self.boss_image, cell_rect) # 画像をブリット
-                else:
-                    self.window.blit(self.bg_image, cell_rect) # 画像をブリット
                 
         pygame.display.flip()
 
