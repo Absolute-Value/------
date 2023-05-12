@@ -5,8 +5,12 @@ class Player:
         self.x = x
         self.y = y
         self.health = 5
+        self.max_health = 5
         self.attack_power = 1
         self.defense_power = 1
+        self.level = 1
+        self.experience = 0
+        self.experience_to_level_up = 20
         self.game_map = game_map
 
     def move(self, dx, dy):
@@ -22,6 +26,23 @@ class Player:
 
     def take_damage(self, damage):
         self.health -= damage
+        if self.health <= 0:
+            print("Player defeated! Game over.")
+            self.game_over = True
+
+    def gain_experience(self, experience):
+        self.experience += experience
+        if self.experience >= self.experience_to_level_up:
+            self.level_up()
+
+    def level_up(self):
+        self.level += 1
+        self.max_health += 5
+        self.health = self.max_health
+        self.experience -= self.experience_to_level_up
+        self.experience_to_level_up *= 2
+        print("Player leveled up! HP increased and fully healed.")
+
 
 class Enemy:
     def __init__(self, x, y, health=2, attack_power=1):
@@ -145,6 +166,7 @@ class Game:
             self.game_over = True
         else:
             print("Enemy defeated!")
+            self.player.gain_experience(10)
             self.enemies.remove(enemy)
             self.map[enemy.x][enemy.y] = "-"  # マップ上から敵を削除
 
@@ -155,5 +177,5 @@ class Game:
             self.move_player(command)
             self.encounter_enemy(self.player.x, self.player.y)
 
-game = Game(5)  # 5x5のマップを作成
+game = Game(10)  # 5x5のマップを作成
 game.run_game()
