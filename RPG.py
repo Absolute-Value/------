@@ -160,8 +160,12 @@ class Game:
 
                 pygame.draw.rect(window, cell_color, cell_rect)
 
-        pygame.display.flip()
+        # プレイヤーのステータスを表示
+        self.draw_text(f"HP: {self.player.health}/{self.player.max_health}", 10, 10)
+        self.draw_text(f"Level: {self.player.level}", 10, 40)
+        self.draw_text(f"Experience: {self.player.experience}/{self.player.experience_to_level_up}", 10, 70)
 
+        pygame.display.flip()
 
     def move_player(self, command):
         if command == "w":
@@ -204,7 +208,7 @@ class Game:
 
     def battle(self, enemy):
         while self.player.health > 0 and enemy.health > 0:
-            self.print_map_with_status()
+            self.print_map()
             print("Player HP:", self.player.health)
             print("Enemy HP:", enemy.health)
 
@@ -231,13 +235,9 @@ class Game:
             self.enemies.remove(enemy)
             self.map[enemy.y][enemy.x] = "-"  # マップ上から敵を削除
 
-    def print_map_with_status(self):
-        self.player.print_status()
-        self.print_map()
-
     def run_game(self):
         while not self.game_over:
-            self.print_map_with_status()
+            self.print_map()
             command = input("Enter your command (w/a/s/d): ")
             self.move_player(command)
             self.encounter_enemy(self.player.x, self.player.y)
@@ -245,6 +245,13 @@ class Game:
             if len(self.enemies) == 0:
                 print("All enemies defeated! You win!")
                 exit()
+
+    def draw_text(self, text, x, y, font_size=24, color=(0, 0, 0)):
+        font = pygame.font.Font(None, font_size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+        text_rect.topleft = (x, y)
+        window.blit(text_surface, text_rect)
 
 game = Game(10)  # 10x10のマップを作成
 game.run_game()
