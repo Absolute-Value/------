@@ -105,7 +105,7 @@ class Game:
         self.states = [f"{enemy.name} showed up !"]
         while self.player.health > 0 and enemy.health > 0:
             self.print_map()
-            self.print_battle()
+            self.print_battle(enemy)
 
             pygame.display.update()
 
@@ -137,7 +137,21 @@ class Game:
             self.states.append(f"Player killed {enemy.name} .")
             # pygame.display.update()
 
-    def print_battle(self):
+    def print_battle(self, enemy):
+        # icon
+        icon_size =(self.window_size[0] // 4, self.window_size[0] // 4)
+        icon_pos = (self.window_size[0] // 2 - icon_size[0] // 2, self.window_size[1] // 2 - icon_size[1] // 1.5)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(icon_pos[0], icon_pos[1], icon_size[0], icon_size[1]))
+        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(icon_pos[0], icon_pos[1], icon_size[0], icon_size[1]), 4)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(icon_pos[0], icon_pos[1], icon_size[0], icon_size[1]), 2)
+        cell_rect = pygame.Rect(icon_pos[0]+5, icon_pos[1]+5, icon_size[0], icon_size[1])
+        if enemy.name == "BoneKing":
+            image = pygame.transform.scale(self.boss_image, (icon_size[0]-10, icon_size[1]-10)) # 画像リサイズ
+        else:
+            image = pygame.transform.scale(self.enemy_image, (icon_size[0]-10, icon_size[1]-10)) # 画像リサイズ
+            
+        self.window.blit(image, cell_rect) # 画像をブリット
+            
         # status
         status_pos = (self.window_size[0] // 10, self.window_size[1] // 10)
         status_size = (self.window_size[0] // 5, self.window_size[0] // 4)
@@ -175,7 +189,7 @@ class Game:
             self.draw_text(text, state_pos[0] + 15, state_pos[1] + 15 + i * 24, color=WHITE_COLOR)
 
 
-    def draw_text(self, text, x, y, font_size=36, color=(0, 0, 0)):
+    def draw_text(self, text, x, y, font_size=36, color=BLACK_COLOR):
         font = pygame.font.Font(None, font_size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
