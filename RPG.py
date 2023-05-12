@@ -76,8 +76,6 @@ class Game:
                     self.window.blit(self.enemy_image, cell_rect) # 画像をブリット
                 elif map_tile == "B":
                     self.window.blit(self.boss_image, cell_rect) # 画像をブリット
-                
-        pygame.display.flip()
 
     def player_move(self, dx, dy):
         new_x = self.player.x + dx
@@ -135,7 +133,6 @@ class Game:
             self.enemies.remove(enemy)
             self.map[enemy.y][enemy.x] = "-"  # マップ上から敵を削除
             self.states.append(f"Player killed {enemy.name} .")
-            # pygame.display.update()
 
     def print_battle(self, enemy):
         # icon
