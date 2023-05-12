@@ -118,18 +118,37 @@ class Game:
             print("3. Magic Attack")
             choice = input("Choose your action (1-3): ")
             if choice == "1":
-                self.physical_attack_enemy(enemy)
+                self.physical_attack(enemy)
                 break
             elif choice == "2":
                 self.defend()
                 break
             elif choice == "3":
-                self.magic_attack_enemy(enemy)
+                self.magic_attack(enemy)
                 break
             else:
                 print("Invalid choice! Please try again.")
 
-    def physical_attack_enemy(self, enemy):
+    def attack_boss(self):
+        while True:
+            print("Boss encountered!")
+            print("1. Physical Attack")
+            print("2. Defend")
+            print("3. Magic Attack")
+            choice = input("Choose your action (1-3): ")
+            if choice == "1":
+                self.physical_attack_boss()
+                break
+            elif choice == "2":
+                self.defend()
+                break
+            elif choice == "3":
+                self.magic_attack_boss()
+                break
+            else:
+                print("Invalid choice! Please try again.")
+
+    def physical_attack(self, enemy):
         enemy.health -= self.player.attack_power
 
         if enemy.health <= 0:
@@ -139,14 +158,26 @@ class Game:
         else:
             print("You attacked an enemy. Enemy's health:", enemy.health)
 
+    def physical_attack_boss(self):
+        self.boss.health -= self.player.attack_power
+
+        if self.boss.health <= 0:
+            print("Congratulations! You defeated the boss!")
+            self.player.level_up()
+        else:
+            print("You attacked the boss. Boss's health:", self.boss.health)
+
     def defend(self):
         print("You defended against the enemy's attack!")
         # Apply any defensive effects or calculations here
 
-    def magic_attack_enemy(self, enemy):
-        # Implement the logic for magic attack here
-        # This can include consuming mana, dealing magical damage, etc.
-        print("Magic attack is not implemented yet!")
+    def magic_attack(self, enemy):
+        # Implement the logic for magic attack against an enemy here
+        print("Magic attack against an enemy is not implemented yet!")
+
+    def magic_attack_boss(self):
+        # Implement the logic for magic attack against the boss here
+        print("Magic attack against the boss is not implemented yet!")
 
     def attack_boss(self):
         self.boss.health -= self.player.attack_power
