@@ -2,12 +2,7 @@ import random
 import pygame
 from pygame.locals import *
 
-# ウィンドウのサイズ
-WINDOW_WIDTH = 600
-WINDOW_HEIGHT = 600
-
 # マップのセルのサイズと色
-CELL_SIZE = 60
 BLACK_COLOR = (0, 0, 0)
 WHITE_COLOR = (255, 255, 255)
 
@@ -46,8 +41,8 @@ class Player:
         self.health = self.max_health
         self.experience -= self.experience_to_level_up
         self.experience_to_level_up *= 2
-        print(f"Player leveled up! ({self.level-1}->{self.level}) ")
-        print("HP increased and fully healed.")
+        print(f"Player leveled up ! ({self.level-1}->{self.level}) ")
+        print("HP increased and fully healed .")
 
 class Enemy:
     def __init__(self, x, y, health=2, attack_power=1):
@@ -73,7 +68,7 @@ class Boss(Enemy):
         self.name = "BoneKing"
 
 class Game:
-    def __init__(self, map_size):
+    def __init__(self, map_size=(12,10), cell_size = 60):
         self.map_size = map_size
         self.map = self.generate_map()
         self.player = Player(0, 0, self.map)
@@ -81,9 +76,13 @@ class Game:
         self.boss_position = random.choice(self.enemies_positions)
         self.enemies = self.generate_enemies()
         self.game_over = False
+        
+        self.cell_size = cell_size
+        self.window_width = map_size[0] * cell_size
+        self.window_height = map_size[1] * cell_size
         pygame.init()
         # ゲームウィンドウの作成
-        self.window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.window = pygame.display.set_mode((self.window_width, self.window_height))
         pygame.display.set_caption('RPG Game')
 
         self.map[self.player.y][self.player.x] = "P"
@@ -92,27 +91,27 @@ class Game:
         self.map[self.boss_position[1]][self.boss_position[0]] = "B"  # ボスの位置をマップに反映
 
         # 使用する画像を読み込んでおく
-        self.bg_image = pygame.transform.scale(pygame.image.load("images/bg.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
-        self.player_image = pygame.transform.scale(pygame.image.load("images/player.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
-        self.enemy_image = pygame.transform.scale(pygame.image.load("images/enemy.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
-        self.boss_image = pygame.transform.scale(pygame.image.load("images/boss.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.bg_image = pygame.transform.scale(pygame.image.load("images/bg.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
+        self.player_image = pygame.transform.scale(pygame.image.load("images/player.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
+        self.enemy_image = pygame.transform.scale(pygame.image.load("images/enemy.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
+        self.boss_image = pygame.transform.scale(pygame.image.load("images/boss.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
         
     def get_random_empty_position(self):
         while True:
-            x = random.randint(0, self.map_size - 1)
-            y = random.randint(0, self.map_size - 1)
+            x = random.randint(0, self.map_size[0] - 1)
+            y = random.randint(0, self.map_size[1] - 1)
             if self.map[y][x] == "-":
                 return x, y
 
     def generate_enemies_positions(self):
         positions = []
-        for _ in range(self.map_size):  # 敵の位置を生成
+        for _ in range(10):  # 敵の位置を生成
             x, y = self.get_random_empty_position()
             positions.append((x, y))
         return positions
 
     def generate_map(self):
-        map = [["-" for _ in range(self.map_size)] for _ in range(self.map_size)]
+        map = [["-" for _ in range(self.map_size[0])] for _ in range(self.map_size[1])]
         return map
 
     def generate_enemies(self):
@@ -129,7 +128,7 @@ class Game:
     def print_map(self):
         for y, map_row in enumerate(self.map):
             for x, map_tile in enumerate(map_row):
-                cell_rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+                cell_rect = pygame.Rect(x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
                 self.window.blit(self.bg_image, cell_rect) # 画像をブリット
                 if map_tile == "P":
                     self.window.blit(self.player_image, cell_rect) # プレイヤー画像をブリット
@@ -146,9 +145,9 @@ class Game:
 
         if (
             new_x >= 0
-            and new_x < self.map_size
+            and new_x < self.map_size[0]
             and new_y >= 0
-            and new_y < self.map_size
+            and new_y < self.map_size[1]
         ):
             if self.map[new_y][new_x] == "E" or self.map[new_y][new_x] == "B":
                 # 敵がいる場合、バトルを開始する
@@ -205,10 +204,10 @@ class Game:
 
     def print_battle(self):
         # status
-        status_left = WINDOW_WIDTH // 10
-        status_top = WINDOW_HEIGHT // 10
-        status_width = WINDOW_WIDTH // 5
-        status_height = WINDOW_WIDTH // 4
+        status_left = self.window_width // 10
+        status_top = self.window_height // 10
+        status_width = self.window_width // 5
+        status_height = self.window_width // 4
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_left, status_top, status_width, status_height))
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(status_left, status_top, status_width, status_height), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_left, status_top, status_width, status_height), 2)
@@ -218,13 +217,13 @@ class Game:
             f"Exp: {self.player.experience}/{self.player.experience_to_level_up}"
         ]
         for i, text in enumerate(status_text):
-            self.draw_text(text, status_left + 10, status_top + 10 + i * 20, color=WHITE_COLOR)
+            self.draw_text(text, status_left + 10, status_top + 10 + i * 24, color=WHITE_COLOR)
 
         # command
-        command_left = WINDOW_WIDTH // 5 * 2
-        command_top = WINDOW_HEIGHT // 12
-        command_width = WINDOW_WIDTH // 2
-        command_height = WINDOW_HEIGHT // 8
+        command_left = self.window_width // 5 * 2
+        command_top = self.window_height // 12
+        command_width = self.window_width // 2
+        command_height = self.window_height // 8
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_left, command_top, command_width, command_height))
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(command_left, command_top, command_width, command_height), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_left, command_top, command_width, command_height), 2)
@@ -233,21 +232,21 @@ class Game:
             f"2 Defence"
         ]
         for i, text in enumerate(status_text):
-            self.draw_text(text, command_left + 15, command_top + 15 + i * 20, color=WHITE_COLOR)
+            self.draw_text(text, command_left + 15, command_top + 15 + i * 24, color=WHITE_COLOR)
 
         # state
-        state_left = WINDOW_WIDTH // 6
-        state_top = WINDOW_HEIGHT // 5 * 3
-        state_width = WINDOW_WIDTH // 3 * 2
-        state_height = WINDOW_HEIGHT // 3
+        state_left = self.window_width // 6
+        state_top = self.window_height // 5 * 3
+        state_width = self.window_width // 3 * 2
+        state_height = self.window_height // 3
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(state_left, state_top, state_width, state_height))
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(state_left, state_top, state_width, state_height), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(state_left, state_top, state_width, state_height), 2)
         for i, text in enumerate(self.states):
-            self.draw_text(text, state_left + 15, state_top + 15 + i * 20, color=WHITE_COLOR)
+            self.draw_text(text, state_left + 15, state_top + 15 + i * 24, color=WHITE_COLOR)
 
 
-    def draw_text(self, text, x, y, font_size=24, color=(0, 0, 0)):
+    def draw_text(self, text, x, y, font_size=36, color=(0, 0, 0)):
         font = pygame.font.Font(None, font_size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
@@ -280,5 +279,5 @@ class Game:
                 if event.key == K_RIGHT:
                     self.player_move(1, 0)
 
-game = Game(10)  # 10x10のマップを作成
+game = Game((12,10))  # 10x10のマップを作成
 game.run_game()
