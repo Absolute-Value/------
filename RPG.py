@@ -12,6 +12,7 @@ PLAYER_COLOR = (0, 0, 255)  # プレイヤーの色 (緑)
 ENEMY_COLOR = (255, 165, 0)  # 敵の色 (オレンジ)
 BOSS_COLOR = (255, 0, 0)  # ボスの色 (赤)
 EMPTY_COLOR = (100, 255, 100)  # 空白セルの色 (白)
+BG_COLOR = (0, 0, 0)
 
 class Player:
     def __init__(self, x, y, game_map):
@@ -176,12 +177,17 @@ class Game:
         pygame.display.flip()
 
     def print_status(self):
+        status_width = 100
+        status_height = 46
+        pygame.draw.rect(self.window, BG_COLOR, pygame.Rect(5, 5, status_width, status_height))
+        pygame.draw.rect(self.window, (255, 255, 255), pygame.Rect(5, 5, status_width, status_height), 4)  # 追加行
+        pygame.draw.rect(self.window, BG_COLOR, pygame.Rect(5, 5, status_width, status_height), 2)  # 追加行
         status_text = [
-            f"HP: {self.player.health}/{self.player.max_health} ({self.player.experience}/{self.player.experience_to_level_up})",
-            f"Lv: {self.player.level}"
+            f"HP: {self.player.health}/{self.player.max_health}",
+            f"Lv: {self.player.level} ({self.player.experience}/{self.player.experience_to_level_up})"
         ]
         for i, text in enumerate(status_text):
-            self.draw_text(text, 10, 10 + i * 30)
+            self.draw_text(text, 12, 12 + i * 16, color=(255,255,255))
 
     def player_move(self, dx, dy):
         new_x = self.player.x + dx
