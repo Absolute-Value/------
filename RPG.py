@@ -68,11 +68,11 @@ class Boss(Enemy):
         self.name = "BoneKing"
 
 class Game:
-    def __init__(self, map_size=(12,10), cell_size = 60):
+    def __init__(self, map_size=(12,10), cell_size=60, enemy_num=16): # 12x10のマップを作成
         self.map_size = map_size
         self.map = self.generate_map()
         self.player = Player(0, 0, self.map)
-        self.enemies_positions = self.generate_enemies_positions()
+        self.enemies_positions = self.generate_enemies_positions(enemy_num=enemy_num)
         self.boss_position = random.choice(self.enemies_positions)
         self.enemies = self.generate_enemies()
         self.game_over = False
@@ -102,9 +102,9 @@ class Game:
             if self.map[y][x] == "-":
                 return x, y
 
-    def generate_enemies_positions(self):
+    def generate_enemies_positions(self, enemy_num=16):
         positions = []
-        for _ in range(10):  # 敵の位置を生成
+        for _ in range(enemy_num):  # 敵の位置を生成
             x, y = self.get_random_empty_position()
             positions.append((x, y))
         return positions
@@ -267,5 +267,5 @@ class Game:
                 if event.key == K_d:
                     self.player_move(1, 0)
 
-game = Game((12,10))  # 10x10のマップを作成
+game = Game()
 game.run_game()
