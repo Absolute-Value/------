@@ -4,9 +4,10 @@ class Player:
     def __init__(self, x, y, game_map):
         self.x = x
         self.y = y
-        self.game_map = game_map
         self.health = 5
         self.attack_power = 1
+        self.defense_power = 1
+        self.game_map = game_map
 
     def move(self, dx, dy):
         self.x += dx
@@ -40,13 +41,14 @@ class Game:
         self.map_size = map_size
         self.map = self.generate_map()
         self.player = Player(0, 0, self.map)  # プレイヤーの初期位置を設定
+        self.enemies_positions = self.generate_enemies_positions()
         self.enemies = self.generate_enemies()
-        self.battle_mode = False  # 戦闘モードのフラグ
-        self.enemy_in_battle = None  # 戦闘中の敵
         self.game_over = False
 
-
-        self.map = self.generate_map()
+        # プレイヤーと敵の位置をマップに反映する
+        self.map[self.player.y][self.player.x] = "P"
+        for enemy in self.enemies:
+            self.map[enemy.y][enemy.x] = "E"
 
     def get_random_empty_position(self):
         while True:
@@ -59,11 +61,18 @@ class Game:
         map = [["-" for _ in range(self.map_size)] for _ in range(self.map_size)]
         return map
 
+    def generate_enemies_positions(self):
+        positions = []
+        for _ in range(self.map_size):
+            x = random.randint(0, self.map_size - 1)
+            y = random.randint(0, self.map_size - 1)
+            positions.append((x, y))
+        return positions
+
     def generate_enemies(self):
-        enemy_count = 5  # 敵の数を設定
         enemies = []
-        for _ in range(enemy_count):
-            x, y = self.get_random_empty_position()
+        for _ in range(len(self.enemies_positions)):
+            x, y = self.enemies_positions[_]
             enemy = Enemy(x, y, 2, 1)  # 体力: 2, 攻撃力: 1
             enemies.append(enemy)
         return enemies
@@ -73,17 +82,15 @@ class Game:
             print(" ".join(row))
         print("")
 
-    def move_player(self, dx, dy):
-        x = self.player.x + dx
-        y = self.player.y + dy
-
-        if 0 <= x < self.map_size and 0 <= y < self.map_size:
-            self.map[self.player.x][self.player.y] = "-"  # プレイヤーの現在位置を空白に
-            self.player.x = x
-            self.player.y = y
-            self.map[x][y] = "P"  # プレイヤーの新しい位置を表示
-        else:
-            print("Invalid move!")
+    def move_player(self, command):
+        if command == "w":
+            self.player.move(0, -1)
+        elif command == "s":
+            self.player.move(0, 1)
+        elif command == "a":
+            self.player.move(-1, 0)
+        elif command == "d":
+            self.player.move(1, 0)
 
     def encounter_enemy(self):
         x = self.player.x
@@ -125,27 +132,9 @@ class Game:
     def run_game(self):
         while not self.game_over:
             self.print_map()
+            command = input("Enter your command (w/a/s/d): ")
+            self.move_player(command)
             self.encounter_enemy()
-            command = input("Enter 'w' to move up, 's' to move down, 'a' to move left, 'd' to move right, or 'q' to quit: ")
-
-            if command == "w":
-                self.move_player(-1, 0)
-            elif command == "s":
-                self.move_player(1, 0)
-            elif command == "a":
-                self.move_player(0, -1)
-            elif command == "d":
-                self.move_player(0, 1)
-            elif command == "q":
-                self.game_over = True
-            else:
-                print("Invalid command!")
-
-            if self.player.x == self.map_size - 1 and self.player.y == self.map_size - 1:
-                print("Congratulations! You reached the exit.")
-                self.game_over = True
-
-        print("Game over. Thanks for playing!")
 
 
 game = Game(5)  # 5x5のマップを作成
