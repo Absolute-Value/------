@@ -110,7 +110,7 @@ class Game:
     def print_map(self):
         for row in self.map:
             print(" ".join(row))
-        print("")
+        print()
 
     def move_player(self, command):
         if command == "w":
@@ -178,7 +178,7 @@ class Game:
             print("Enemy defeated!")
             self.player.gain_experience(10)
             self.enemies.remove(enemy)
-            self.map[enemy.x][enemy.y] = "-"  # マップ上から敵を削除
+            self.map[enemy.y][enemy.x] = "-"  # マップ上から敵を削除
 
     def print_map_with_status(self):
         self.player.print_status()
