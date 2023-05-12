@@ -104,16 +104,17 @@ class Game:
                 self.map[self.player.y][self.player.x] = "-"  # 元の位置を空白に戻す
                 self.player.move(dx, dy)
                 self.map[self.player.y][self.player.x] = "P"  # 移動後の位置にプレイヤーを表示
-                self.encounter_enemy()
+                self.encounter_enemy(self.player.x, self.player.y)  # 新しい位置に敵がいるかチェック
+            elif self.map[new_y][new_x] == "E":
+                # 移動先に敵がいる場合、バトルを開始する
+                self.encounter_enemy(new_x, new_y)
             else:
                 print("You can't move there. Try again.")
         else:
             print("You can't move there. Try again.")
 
-    def encounter_enemy(self):
-        x = self.player.x
-        y = self.player.y
 
+    def encounter_enemy(self, x, y):
         for enemy in self.enemies:
             if enemy.x == x and enemy.y == y:
                 print("Encountered an enemy!")
@@ -152,7 +153,7 @@ class Game:
             self.print_map()
             command = input("Enter your command (w/a/s/d): ")
             self.move_player(command)
-            self.encounter_enemy()
+            self.encounter_enemy(self.player.x, self.player.y)
 
 game = Game(5)  # 5x5のマップを作成
 game.run_game()
