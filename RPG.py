@@ -191,5 +191,9 @@ class Game:
             self.move_player(command)
             self.encounter_enemy(self.player.x, self.player.y)
 
-game = Game(10)  # 5x5のマップを作成
+            if len(self.enemies) == 0:
+                print("All enemies defeated! You win!")
+                exit()
+
+game = Game(10)  # 10x10のマップを作成
 game.run_game()
