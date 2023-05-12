@@ -1,4 +1,5 @@
 import random
+import sys
 
 class Player:
     def __init__(self, x, y, game_map):
@@ -68,7 +69,7 @@ class Enemy:
         self.health -= damage
 
 class Boss(Enemy):
-    def __init__(self, x, y, health=5, attack_power=5):
+    def __init__(self, x, y, health=5, attack_power=3):
         super().__init__(x, y, health, attack_power)
 
 class Game:
@@ -124,7 +125,17 @@ class Game:
 
     def print_map(self):
         for row in self.map:
-            print(" ".join(row))
+            for tile in row:
+                if tile == "P":
+                    sys.stdout.write("\033[94mP\033[0m")  # プレイヤーを青色で表示
+                elif tile == "E":
+                    sys.stdout.write("\033[38;5;202mE\033[0m")  # 敵をオレンジ色で表示
+                elif tile == "B":
+                    sys.stdout.write("\033[91mB\033[0m")  # ボスを赤色で表示
+                else:
+                    sys.stdout.write(tile)
+                sys.stdout.write(" ")
+            sys.stdout.write("\n")
         print()
 
     def move_player(self, command):
