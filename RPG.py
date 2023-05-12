@@ -13,6 +13,13 @@ class Player:
         self.experience_to_level_up = 20
         self.game_map = game_map
 
+    def print_status(self):
+        print("Player Status:")
+        print("Level:", self.level)
+        print("HP:", self.health, "/", self.max_health)
+        print("Experience:", self.experience, "/", self.experience_to_level_up)
+        print()
+
     def move(self, dx, dy):
         self.x += dx
         self.y += dy
@@ -42,7 +49,6 @@ class Player:
         self.experience -= self.experience_to_level_up
         self.experience_to_level_up *= 2
         print("Player leveled up! HP increased and fully healed.")
-
 
 class Enemy:
     def __init__(self, x, y, health=2, attack_power=1):
@@ -143,6 +149,7 @@ class Game:
 
     def battle(self, enemy):
         while self.player.health > 0 and enemy.health > 0:
+            self.player.print_status()
             self.print_map()
             print("Player HP:", self.player.health)
             print("Enemy HP:", enemy.health)
@@ -170,9 +177,13 @@ class Game:
             self.enemies.remove(enemy)
             self.map[enemy.x][enemy.y] = "-"  # マップ上から敵を削除
 
+    def print_map_with_status(self):
+        self.player.print_status()
+        self.print_map()
+
     def run_game(self):
         while not self.game_over:
-            self.print_map()
+            self.print_map_with_status()
             command = input("Enter your command (w/a/s/d): ")
             self.move_player(command)
             self.encounter_enemy(self.player.x, self.player.y)
