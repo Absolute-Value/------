@@ -15,7 +15,7 @@ class Player:
 class Game:
     def __init__(self, map_size):
         self.map_size = map_size
-        self.map = [[' ' for _ in range(self.map_size)] for _ in range(self.map_size)]
+        self.map = [['-' for _ in range(self.map_size)] for _ in range(self.map_size)]
         self.player = Player()
         self.player_position = None
         self.enemies = []
@@ -37,7 +37,7 @@ class Game:
             while True:
                 x = random.randint(0, self.map_size - 1)
                 y = random.randint(0, self.map_size - 1)
-                if self.map[x][y] == ' ':
+                if self.map[x][y] == '-':
                     self.map[x][y] = 'E'
                     self.enemies.append((x, y))
                     break
@@ -60,8 +60,8 @@ class Game:
 
         if self.map[x][y] == 'E':
             self.encounter_enemy(x, y)
-        elif self.map[x][y] == ' ':
-            self.map[self.player_position[0]][self.player_position[1]] = ' '
+        elif self.map[x][y] == '-':
+            self.map[self.player_position[0]][self.player_position[1]] = '-'
             self.player_position = (x, y)
             self.map[x][y] = 'P'
 
@@ -91,7 +91,7 @@ class Game:
                 print("Invalid choice! Please try again.")
 
     def physical_attack(self, enemy):
-        self.map[enemy[0]][enemy[1]] = ' '
+        self.map[enemy[0]][enemy[1]] = '-'
         print("You defeated an enemy!")
         self.player.level_up()
 
@@ -110,6 +110,9 @@ class Game:
                 self.move_player(command)
             else:
                 print("Invalid command!")
+
+            if not self.enemies:
+                self.game_over = True
 
     def game_over(self):
         print("Game Over")
