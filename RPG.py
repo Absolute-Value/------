@@ -40,7 +40,7 @@ class Game:
         while True:
             x = random.randint(0, self.map_size[0] - 1)
             y = random.randint(0, self.map_size[1] - 1)
-            if self.entity_map[y][x] == 0:
+            if self.entity_map[y][x] == 0 and self.map[y][x] == 0:
                 return x, y
 
     def generate_enemies_positions(self, enemy_num=16):
@@ -90,7 +90,7 @@ class Game:
         new_x = self.player.x + dx
         new_y = self.player.y + dy
 
-        if (new_x >= 0 and new_x < self.map_size[0] and new_y >= 0 and new_y < self.map_size[1]):
+        if (new_x >= 0 and new_x < self.map_size[0] and new_y >= 0 and new_y < self.map_size[1] and (self.map[new_y][new_x] == 0)):
             if self.entity_map[new_y][new_x] > 1:
                 # 敵がいる場合、バトルを開始する
                 self.encounter_enemy(new_x, new_y)
