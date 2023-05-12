@@ -3,23 +3,7 @@ import pygame
 from pygame.locals import *
 from enemies import *
 from player import Player
-
-# マップのセルのサイズと色
-BLACK_COLOR = (0, 0, 0)
-WHITE_COLOR = (255, 255, 255)
-
-MAP = [
-        [0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,0,0,0,0,0,0,1,1],
-        [0,0,0,0,0,0,0,0,1,1,1,1],
-    ]
+from define import *
 
 class Game:
     def __init__(self, cell_size=60, enemy_num=16): # 12x10のマップを作成
@@ -46,6 +30,7 @@ class Game:
 
         # 使用する画像を読み込んでおく
         self.land_image = pygame.transform.scale(pygame.image.load("images/land.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
+        self.tree_image = pygame.transform.scale(pygame.image.load("images/tree.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
         self.sea_image = pygame.transform.scale(pygame.image.load("images/sea.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
         self.player_image = pygame.transform.scale(pygame.image.load("images/player.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
         self.enemy_image = pygame.transform.scale(pygame.image.load("images/enemy.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
@@ -84,10 +69,12 @@ class Game:
         for y, map_row in enumerate(self.map):
             for x, map_tile in enumerate(map_row):
                 cell_rect = pygame.Rect(x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
-                if map_tile == 1:
+                if map_tile == 8:
                     self.window.blit(self.sea_image, cell_rect) # 画像をブリット
                 else:
                     self.window.blit(self.land_image, cell_rect) # 画像をブリット
+                    if map_tile == 1:
+                        self.window.blit(self.tree_image, cell_rect) # 画像をブリット
         
         cell_rect = pygame.Rect(self.player.x * self.cell_size, self.player.y * self.cell_size, self.cell_size, self.cell_size)
         self.window.blit(self.player_image, cell_rect) # プレイヤー画像をブリット
