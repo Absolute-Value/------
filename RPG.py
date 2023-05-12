@@ -8,11 +8,8 @@ WINDOW_HEIGHT = 600
 
 # マップのセルのサイズと色
 CELL_SIZE = 50
-PLAYER_COLOR = (0, 0, 255)  # プレイヤーの色 (緑)
-ENEMY_COLOR = (255, 165, 0)  # 敵の色 (オレンジ)
-BOSS_COLOR = (255, 0, 0)  # ボスの色 (赤)
-EMPTY_COLOR = (100, 255, 100)  # 空白セルの色 (白)
-BG_COLOR = (0, 0, 0)
+BLACK_COLOR = (0, 0, 0)
+WHITE_COLOR = (255, 255, 255)
 
 class Player:
     def __init__(self, x, y, game_map):
@@ -150,7 +147,7 @@ class Game:
         for position in self.enemies_positions:
             x, y = position
             if position == self.boss_position:
-                enemy = Boss(x, y, 5, 5)  # BossのHP: 5, 攻撃力: 5
+                enemy = Boss(x, y, 5, 3)  # BossのHP: 5, 攻撃力: 5
             else:
                 enemy = Enemy(x, y, 2, 1)  # 通常の敵のHP: 2, 攻撃力: 1
             enemies.append(enemy)
@@ -160,34 +157,35 @@ class Game:
         for y in range(len(self.map)):
             for x in range(len(self.map[0])):
                 cell_rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-                cell_color = EMPTY_COLOR
+                image = pygame.image.load("bg.png")  # 画像の読み込み
 
                 if self.player.x == x and self.player.y == y:
-                    cell_color = PLAYER_COLOR
+                    image = pygame.image.load("player.png")  # プレイヤー画像の読み込み
                 elif (x, y) == self.boss_position:
-                    cell_color = BOSS_COLOR
+                    image = pygame.image.load("boss.png")  # 画像の読み込み
                 else:
                     for enemy in self.enemies:
                         if enemy.x == x and enemy.y == y:
-                            cell_color = ENEMY_COLOR
+                            image = pygame.image.load("enemy.png")  # 画像の読み込み
                             break
 
-                pygame.draw.rect(self.window, cell_color, cell_rect)
-        
+                image = pygame.transform.scale(image, (CELL_SIZE, CELL_SIZE))  # セルサイズにリサイズ
+                self.window.blit(image, cell_rect) # プレイヤー画像をブリット
+                
         pygame.display.flip()
 
     def print_status(self):
-        status_width = 100
+        status_width = 130
         status_height = 46
-        pygame.draw.rect(self.window, BG_COLOR, pygame.Rect(5, 5, status_width, status_height))
-        pygame.draw.rect(self.window, (255, 255, 255), pygame.Rect(5, 5, status_width, status_height), 4)  # 追加行
-        pygame.draw.rect(self.window, BG_COLOR, pygame.Rect(5, 5, status_width, status_height), 2)  # 追加行
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(5, 5, status_width, status_height))
+        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(5, 5, status_width, status_height), 4)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(5, 5, status_width, status_height), 2)
         status_text = [
             f"HP: {self.player.health}/{self.player.max_health}",
             f"Lv: {self.player.level} ({self.player.experience}/{self.player.experience_to_level_up})"
         ]
         for i, text in enumerate(status_text):
-            self.draw_text(text, 12, 12 + i * 16, color=(255,255,255))
+            self.draw_text(text, 12, 12 + i * 16, color=WHITE_COLOR)
 
     def player_move(self, dx, dy):
         new_x = self.player.x + dx
@@ -204,7 +202,6 @@ class Game:
                 # 敵がいる場合、バトルを開始する
                 self.encounter_enemy(new_x, new_y)
             else:
-                self.map[self.player.y][self.player.x] = "."
                 self.player.x = new_x
                 self.player.y = new_y
                 self.map[self.player.y][self.player.x] = "P"
