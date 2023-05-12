@@ -96,10 +96,10 @@ class Game:
         self.map[self.boss_position[1]][self.boss_position[0]] = "B"  # ボスの位置をマップに反映
 
         # 使用する画像を読み込んでおく
-        self.bg_image = pygame.transform.scale(pygame.image.load("bg.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
-        self.player_image = pygame.transform.scale(pygame.image.load("player.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
-        self.enemy_image = pygame.transform.scale(pygame.image.load("enemy.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
-        self.boss_image = pygame.transform.scale(pygame.image.load("boss.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.bg_image = pygame.transform.scale(pygame.image.load("images/bg.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.player_image = pygame.transform.scale(pygame.image.load("images/player.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.enemy_image = pygame.transform.scale(pygame.image.load("images/enemy.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.boss_image = pygame.transform.scale(pygame.image.load("images/boss.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
         
     def get_random_empty_position(self):
         while True:

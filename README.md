@@ -19,7 +19,7 @@ python RPG.py
 ```
 
 ## 背景などの画像
-![](bg.png)
+![](images/bg.png)
 
 - コチラのサイトから使用させていただきました。
     - [DOT ILLUST](https://dot-illust.net/)
