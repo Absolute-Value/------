@@ -1,5 +1,7 @@
 # Python RPG
 
+![](images/hero.png)
+
 pythonを用いてRPGゲームを実装しました。  
 (ベースはChatCPTで作りました)
 
