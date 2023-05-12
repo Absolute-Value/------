@@ -1,71 +1,12 @@
 import random
 import pygame
 from pygame.locals import *
+from enemies import *
+from player import Player
 
 # マップのセルのサイズと色
 BLACK_COLOR = (0, 0, 0)
 WHITE_COLOR = (255, 255, 255)
-
-class Player:
-    def __init__(self, x, y, game_map):
-        self.x = x
-        self.y = y
-        self.health = 5
-        self.max_health = 5
-        self.attack_power = 1
-        self.defense = False
-        self.level = 1
-        self.experience = 0
-        self.experience_to_level_up = 20
-        self.game_map = game_map
-        self.game_map[self.y][self.x] = "P"
-
-    def attack(self, enemy):
-        enemy.health -= self.attack_power
-        return f"Player did {self.attack_power} damage to {enemy.name} ."
-
-    def take_damage(self, damage):
-        self.health -= damage
-        if self.health <= 0:
-            print("Player was killed ! Game over .")
-            self.game_over = True
-
-    def gain_experience(self, experience):
-        self.experience += experience
-        if self.experience >= self.experience_to_level_up:
-            self.level_up()
-
-    def level_up(self):
-        self.level += 1
-        self.max_health += 5
-        self.health = self.max_health
-        self.experience -= self.experience_to_level_up
-        self.experience_to_level_up *= 2
-        print(f"Player leveled up ! ({self.level-1}->{self.level}) ")
-        print("HP increased and fully healed .")
-
-class Enemy:
-    def __init__(self, x, y, health=2, attack_power=1):
-        self.x = x
-        self.y = y
-        self.health = health
-        self.attack_power = attack_power
-        self.name = "Bone"
-
-    def attack(self, player):
-        if player.defense:
-            return "Player defended the attack!"
-        else:
-            player.take_damage(self.attack_power)
-            return f"{self.name} did {self.attack_power} damage to player!"
-
-    def take_damage(self, damage):
-        self.health -= damage
-
-class Boss(Enemy):
-    def __init__(self, x, y, health=5, attack_power=3):
-        super().__init__(x, y, health, attack_power)
-        self.name = "BoneKing"
 
 class Game:
     def __init__(self, map_size=(12,10), cell_size=60, enemy_num=16): # 12x10のマップを作成
