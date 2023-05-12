@@ -8,30 +8,45 @@ from player import Player
 BLACK_COLOR = (0, 0, 0)
 WHITE_COLOR = (255, 255, 255)
 
+MAP = [
+        [0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0,1,1],
+        [0,0,0,0,0,0,0,0,1,1,1,1],
+    ]
+
 class Game:
-    def __init__(self, map_size=(12,10), cell_size=60, enemy_num=16): # 12x10のマップを作成
-        self.map_size = map_size
-        self.map = self.generate_map()
-        self.player = Player(0, 0, self.map)
+    def __init__(self, cell_size=60, enemy_num=16): # 12x10のマップを作成
+        self.map = MAP
+        self.map_size = (len(self.map[0]), len(self.map))
+        self.entity_map = self.generate_map()
+        self.player = Player(0, 0, self.entity_map)
         self.enemies_positions = self.generate_enemies_positions(enemy_num=enemy_num)
         self.boss_position = random.choice(self.enemies_positions)
         self.enemies = self.generate_enemies()
         self.game_over = False
         
         self.cell_size = cell_size
-        self.window_size = [m * cell_size for m in map_size]
+        self.window_size = [m * cell_size for m in self.map_size]
         pygame.init()
         # ゲームウィンドウの作成
         self.window = pygame.display.set_mode((self.window_size[0], self.window_size[1]))
         pygame.display.set_caption('RPG Game')
 
-        self.map[self.player.y][self.player.x] = "P"
+        self.entity_map[self.player.y][self.player.x] = 1
         for enemy in self.enemies:
-            self.map[enemy.y][enemy.x] = "E"
-        self.map[self.boss_position[1]][self.boss_position[0]] = "B"  # ボスの位置をマップに反映
+            self.entity_map[enemy.y][enemy.x] = 2
+        self.entity_map[self.boss_position[1]][self.boss_position[0]] = 3  # ボスの位置をマップに反映
 
         # 使用する画像を読み込んでおく
-        self.bg_image = pygame.transform.scale(pygame.image.load("images/bg.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
+        self.land_image = pygame.transform.scale(pygame.image.load("images/land.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
+        self.sea_image = pygame.transform.scale(pygame.image.load("images/sea.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
         self.player_image = pygame.transform.scale(pygame.image.load("images/player.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
         self.enemy_image = pygame.transform.scale(pygame.image.load("images/enemy.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
         self.boss_image = pygame.transform.scale(pygame.image.load("images/boss.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
@@ -40,7 +55,7 @@ class Game:
         while True:
             x = random.randint(0, self.map_size[0] - 1)
             y = random.randint(0, self.map_size[1] - 1)
-            if self.map[y][x] == "-":
+            if self.entity_map[y][x] == 0:
                 return x, y
 
     def generate_enemies_positions(self, enemy_num=16):
@@ -51,7 +66,7 @@ class Game:
         return positions
 
     def generate_map(self):
-        map = [["-" for _ in range(self.map_size[0])] for _ in range(self.map_size[1])]
+        map = [[0 for _ in range(self.map_size[0])] for _ in range(self.map_size[1])]
         return map
 
     def generate_enemies(self):
@@ -69,26 +84,33 @@ class Game:
         for y, map_row in enumerate(self.map):
             for x, map_tile in enumerate(map_row):
                 cell_rect = pygame.Rect(x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
-                self.window.blit(self.bg_image, cell_rect) # 画像をブリット
-                if map_tile == "P":
-                    self.window.blit(self.player_image, cell_rect) # プレイヤー画像をブリット
-                elif map_tile == "E":
-                    self.window.blit(self.enemy_image, cell_rect) # 画像をブリット
-                elif map_tile == "B":
-                    self.window.blit(self.boss_image, cell_rect) # 画像をブリット
+                if map_tile == 1:
+                    self.window.blit(self.sea_image, cell_rect) # 画像をブリット
+                else:
+                    self.window.blit(self.land_image, cell_rect) # 画像をブリット
+        
+        cell_rect = pygame.Rect(self.player.x * self.cell_size, self.player.y * self.cell_size, self.cell_size, self.cell_size)
+        self.window.blit(self.player_image, cell_rect) # プレイヤー画像をブリット
+        
+        for enemy in self.enemies:
+            cell_rect = pygame.Rect(enemy.x * self.cell_size, enemy.y * self.cell_size, self.cell_size, self.cell_size)
+            if enemy.name == "BoneKing":
+                self.window.blit(self.boss_image, cell_rect) # 画像をブリット
+            else:
+                self.window.blit(self.enemy_image, cell_rect) # 画像をブリット
 
     def player_move(self, dx, dy):
         new_x = self.player.x + dx
         new_y = self.player.y + dy
 
         if (new_x >= 0 and new_x < self.map_size[0] and new_y >= 0 and new_y < self.map_size[1]):
-            if self.map[new_y][new_x] == "E" or self.map[new_y][new_x] == "B":
+            if self.entity_map[new_y][new_x] > 1:
                 # 敵がいる場合、バトルを開始する
                 self.encounter_enemy(new_x, new_y)
-            self.map[self.player.y][self.player.x] = "-"
+            self.entity_map[self.player.y][self.player.x] = 0
             self.player.x = new_x
             self.player.y = new_y
-            self.map[self.player.y][self.player.x] = "P"
+            self.entity_map[self.player.y][self.player.x] = 1
         else:
             print("You can't move there . Try again .")
 
@@ -131,7 +153,7 @@ class Game:
         else:
             self.player.gain_experience(10)
             self.enemies.remove(enemy)
-            self.map[enemy.y][enemy.x] = "-"  # マップ上から敵を削除
+            self.entity_map[enemy.y][enemy.x] = 0  # マップ上から敵を削除
             self.states.append(f"Player killed {enemy.name} .")
 
     def print_battle(self, enemy):
