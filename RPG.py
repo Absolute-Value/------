@@ -4,10 +4,10 @@ from pygame.locals import *
 
 # ウィンドウのサイズ
 WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 600
+WINDOW_HEIGHT = 800
 
 # マップのセルのサイズと色
-CELL_SIZE = 50
+CELL_SIZE = 80
 BLACK_COLOR = (0, 0, 0)
 WHITE_COLOR = (255, 255, 255)
 
@@ -18,33 +18,12 @@ class Player:
         self.health = 5
         self.max_health = 5
         self.attack_power = 1
-        self.defense_power = 1
+        self.defense = False
         self.level = 1
         self.experience = 0
         self.experience_to_level_up = 20
         self.game_map = game_map
-
-    def move(self, dx, dy):
-        new_x = self.x + dx
-        new_y = self.y + dy
-
-        # 移動先がマップ内かどうかをチェック
-        if 0 <= new_x < len(self.game_map[0]) and 0 <= new_y < len(self.game_map):
-            if self.game_map[new_y][new_x] == "-":
-                # 移動先が空白の場合、プレイヤーを移動させる
-                self.game_map[self.y][self.x] = "-"  # 元の位置を空白に戻す
-                self.x = new_x
-                self.y = new_y
-                self.game_map[self.y][self.x] = "P"  # 移動後の位置にプレイヤーを表示
-                self.encounter_enemy(self.x, self.y)  # 新しい位置に敵がいるかチェック
-            elif self.game_map[new_y][new_x] == "E" or self.game_map[new_y][new_x] == "B":
-                # 移動先に敵がいる場合、バトルを開始する
-                self.encounter_enemy(new_x, new_y)
-            else:
-                print("You can't move there. Try again.")
-        else:
-            print("You can't move there. Try again.")
-
+        self.game_map[self.y][self.x] = "P"
 
     def encounter_enemy(self, x, y):
         for enemy in self.enemies:
@@ -54,10 +33,7 @@ class Player:
 
     def attack(self, enemy):
         enemy.health -= self.attack_power
-
-    def defend(self):
-        self.defense_power = 2
-        print("Player is defending. Defense power increased.")
+        return f"Attacked {self.attack_power}"
 
     def take_damage(self, damage):
         self.health -= damage
@@ -76,7 +52,8 @@ class Player:
         self.health = self.max_health
         self.experience -= self.experience_to_level_up
         self.experience_to_level_up *= 2
-        print("Player leveled up! HP increased and fully healed.")
+        print(f"Player leveled up!({self.level-1}->{self.level}) ")
+        print("HP increased and fully healed.")
 
 class Enemy:
     def __init__(self, x, y, health=2, attack_power=1):
@@ -86,10 +63,11 @@ class Enemy:
         self.attack_power = attack_power
 
     def attack(self, player):
-        if player.defense_power > 1:
-            print("Player defended the attack!")
+        if player.defense:
+            return "Player defended the attack!"
         else:
             player.take_damage(self.attack_power)
+            return f"Damaged {self.attack_power}"
 
     def take_damage(self, damage):
         self.health -= damage
@@ -132,7 +110,7 @@ class Game:
 
     def generate_enemies_positions(self):
         positions = []
-        for _ in range(self.map_size - 1):  # ボスを除く敵の位置を生成
+        for _ in range(self.map_size):  # 敵の位置を生成
             x, y = self.get_random_empty_position()
             positions.append((x, y))
         return positions
@@ -166,19 +144,6 @@ class Game:
                 
         pygame.display.flip()
 
-    def print_status(self):
-        status_width = 130
-        status_height = 46
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(5, 5, status_width, status_height))
-        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(5, 5, status_width, status_height), 4)
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(5, 5, status_width, status_height), 2)
-        status_text = [
-            f"HP: {self.player.health}/{self.player.max_health}",
-            f"Lv: {self.player.level} ({self.player.experience}/{self.player.experience_to_level_up})"
-        ]
-        for i, text in enumerate(status_text):
-            self.draw_text(text, 12, 12 + i * 16, color=WHITE_COLOR)
-
     def player_move(self, dx, dy):
         new_x = self.player.x + dx
         new_y = self.player.y + dy
@@ -192,11 +157,13 @@ class Game:
             if self.map[new_y][new_x] == "E" or self.map[new_y][new_x] == "B":
                 # 敵がいる場合、バトルを開始する
                 self.encounter_enemy(new_x, new_y)
-            else:
-                self.map[self.player.y][self.player.x] = "-"
-                self.player.x = new_x
-                self.player.y = new_y
-                self.map[self.player.y][self.player.x] = "P"
+            self.map[self.player.y][self.player.x] = "-"
+            self.player.x = new_x
+            self.player.y = new_y
+            self.map[self.player.y][self.player.x] = "P"
+        else:
+            print("You can't move there. Try again.")
+
 
     def encounter_enemy(self, x, y):
         for enemy in self.enemies:
@@ -205,26 +172,30 @@ class Game:
 
     def battle(self, enemy):
         self.current_enemy = enemy
+        self.states = ["Battle start !"]
         while self.player.health > 0 and enemy.health > 0:
             self.print_map()
-            self.print_status()
+            self.print_battle()
 
             pygame.display.update()
 
             # プレイヤーのターン
+            self.player.defense = False
             command_entered = False
             while not command_entered:
-                self.handle_events()
-                keys = pygame.key.get_pressed()
-                if keys[K_a]:
-                    self.player.attack(enemy)
-                    command_entered = True
-                if keys[K_d]:
-                    self.player.defend()
-                    command_entered = True
+                for event in pygame.event.get():
+                    if event.type == KEYDOWN:
+                        pygame.event.clear()
+                        self.states = []
+                        if event.key == K_1:
+                            self.states.append(self.player.attack(enemy))
+                            command_entered = True
+                        elif event.key == K_2:
+                            self.player.defense = True
+                            command_entered = True
 
             # 敵のターン
-            enemy.attack(self.player)
+            self.states.append(enemy.attack(self.player))
 
         if self.player.health <= 0:
             pygame.display.update()
@@ -233,7 +204,52 @@ class Game:
             self.player.gain_experience(10)
             self.enemies.remove(enemy)
             self.map[enemy.y][enemy.x] = "-"  # マップ上から敵を削除
-            pygame.display.update()
+            self.states.append("Killed")
+            # pygame.display.update()
+
+    def print_battle(self):
+        # status
+        status_left = 35
+        status_top = 35
+        status_width = 130
+        status_height = 100
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_left, status_top, status_width, status_height))
+        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(status_left, status_top, status_width, status_height), 4)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_left, status_top, status_width, status_height), 2)
+        status_text = [
+            f"Lv: {self.player.level} ({self.player.experience}/{self.player.experience_to_level_up})",
+            f"HP: {self.player.health}/{self.player.max_health}",
+            f"E : {self.player.experience}"
+        ]
+        for i, text in enumerate(status_text):
+            self.draw_text(text, status_left + 10, status_top + 10 + i * 20, color=WHITE_COLOR)
+
+        # command
+        command_left = 220
+        command_top = 15
+        command_width = 260
+        command_height = 60
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_left, command_top, command_width, command_height))
+        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(command_left, command_top, command_width, command_height), 4)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_left, command_top, command_width, command_height), 2)
+        status_text = [
+            f"1 Attack",
+            f"2 Defence"
+        ]
+        for i, text in enumerate(status_text):
+            self.draw_text(text, command_left + 15, command_top + 15 + i * 20, color=WHITE_COLOR)
+
+        # state
+        state_left = 100
+        state_top = 300
+        state_width = 300
+        state_height = 150
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(state_left, state_top, state_width, state_height))
+        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(state_left, state_top, state_width, state_height), 4)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(state_left, state_top, state_width, state_height), 2)
+        for i, text in enumerate(self.states):
+            self.draw_text(text, state_left + 15, state_top + 15 + i * 20, color=WHITE_COLOR)
+
 
     def draw_text(self, text, x, y, font_size=24, color=(0, 0, 0)):
         font = pygame.font.Font(None, font_size)
@@ -256,6 +272,7 @@ class Game:
                 self.game_over = True
 
             if event.type == KEYDOWN:
+                pygame.event.clear()
                 if event.key == K_ESCAPE:
                     self.game_over = True
                 if event.key == K_UP:
@@ -266,10 +283,6 @@ class Game:
                     self.player_move(-1, 0)
                 if event.key == K_RIGHT:
                     self.player_move(1, 0)
-                if event.key == K_a:
-                    self.player.attack(self.current_enemy)
-                if event.key == K_d:
-                    self.player.defend()
 
 game = Game(10)  # 10x10のマップを作成
 game.run_game()
