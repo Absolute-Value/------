@@ -78,11 +78,10 @@ class Game:
         self.game_over = False
         
         self.cell_size = cell_size
-        self.window_width = map_size[0] * cell_size
-        self.window_height = map_size[1] * cell_size
+        self.window_size = [m * cell_size for m in map_size]
         pygame.init()
         # ゲームウィンドウの作成
-        self.window = pygame.display.set_mode((self.window_width, self.window_height))
+        self.window = pygame.display.set_mode((self.window_size[0], self.window_size[1]))
         pygame.display.set_caption('RPG Game')
 
         self.map[self.player.y][self.player.x] = "P"
@@ -143,12 +142,7 @@ class Game:
         new_x = self.player.x + dx
         new_y = self.player.y + dy
 
-        if (
-            new_x >= 0
-            and new_x < self.map_size[0]
-            and new_y >= 0
-            and new_y < self.map_size[1]
-        ):
+        if (new_x >= 0 and new_x < self.map_size[0] and new_y >= 0 and new_y < self.map_size[1]):
             if self.map[new_y][new_x] == "E" or self.map[new_y][new_x] == "B":
                 # 敵がいる場合、バトルを開始する
                 self.encounter_enemy(new_x, new_y)
@@ -204,46 +198,40 @@ class Game:
 
     def print_battle(self):
         # status
-        status_left = self.window_width // 10
-        status_top = self.window_height // 10
-        status_width = self.window_width // 5
-        status_height = self.window_width // 4
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_left, status_top, status_width, status_height))
-        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(status_left, status_top, status_width, status_height), 4)
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_left, status_top, status_width, status_height), 2)
+        status_pos = (self.window_size[0] // 10, self.window_size[1] // 10)
+        status_size = (self.window_size[0] // 5, self.window_size[0] // 4)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_pos[0], status_pos[1], status_size[0], status_size[1]))
+        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(status_pos[0], status_pos[1], status_size[0], status_size[1]), 4)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_pos[0], status_pos[1], status_size[0], status_size[1]), 2)
         status_text = [
             f"Lv.: {self.player.level}",
             f"HP : {self.player.health}/{self.player.max_health}",
             f"Exp: {self.player.experience}/{self.player.experience_to_level_up}"
         ]
         for i, text in enumerate(status_text):
-            self.draw_text(text, status_left + 10, status_top + 10 + i * 24, color=WHITE_COLOR)
+            self.draw_text(text, status_pos[0] + 10, status_pos[1] + 10 + i * 24, color=WHITE_COLOR)
 
         # command
-        command_left = self.window_width // 5 * 2
-        command_top = self.window_height // 12
-        command_width = self.window_width // 2
-        command_height = self.window_height // 8
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_left, command_top, command_width, command_height))
-        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(command_left, command_top, command_width, command_height), 4)
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_left, command_top, command_width, command_height), 2)
+        command_pos = (self.window_size[0] // 5 * 2, self.window_size[1] // 12)
+        command_size = (self.window_size[0] // 2, self.window_size[1] // 8)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]))
+        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 4)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 2)
         status_text = [
             f"n Attack",
             f"m Defence"
         ]
         for i, text in enumerate(status_text):
-            self.draw_text(text, command_left + 15, command_top + 15 + i * 24, color=WHITE_COLOR)
+            self.draw_text(text, command_pos[0] + 15, command_pos[1] + 15 + i * 24, color=WHITE_COLOR)
 
         # state
-        state_left = self.window_width // 6
-        state_top = self.window_height // 5 * 3
-        state_width = self.window_width // 3 * 2
-        state_height = self.window_height // 3
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(state_left, state_top, state_width, state_height))
-        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(state_left, state_top, state_width, state_height), 4)
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(state_left, state_top, state_width, state_height), 2)
+        state_pos = (self.window_size[0] // 6, self.window_size[1] // 5 * 3)
+        state_size = (self.window_size[0] // 3 * 2, self.window_size[1] // 3)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(state_pos[0], state_pos[1], state_size[0], state_size[1]))
+        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(state_pos[0], state_pos[1], state_size[0], state_size[1]), 4)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(state_pos[0], state_pos[1], state_size[0], state_size[1]), 2)
         for i, text in enumerate(self.states):
-            self.draw_text(text, state_left + 15, state_top + 15 + i * 24, color=WHITE_COLOR)
+            self.draw_text(text, state_pos[0] + 15, state_pos[1] + 15 + i * 24, color=WHITE_COLOR)
 
 
     def draw_text(self, text, x, y, font_size=36, color=(0, 0, 0)):
