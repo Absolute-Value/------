@@ -182,10 +182,10 @@ class Game:
                     if event.type == KEYDOWN:
                         pygame.event.clear()
                         self.states = []
-                        if event.key == K_1:
+                        if event.key == K_n:
                             self.states.append(self.player.attack(enemy))
                             command_entered = True
-                        elif event.key == K_2:
+                        elif event.key == K_m:
                             self.player.defense = True
                             command_entered = True
 
@@ -228,8 +228,8 @@ class Game:
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(command_left, command_top, command_width, command_height), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_left, command_top, command_width, command_height), 2)
         status_text = [
-            f"1 Attack",
-            f"2 Defence"
+            f"n Attack",
+            f"m Defence"
         ]
         for i, text in enumerate(status_text):
             self.draw_text(text, command_left + 15, command_top + 15 + i * 24, color=WHITE_COLOR)
@@ -270,13 +270,13 @@ class Game:
                 pygame.event.clear()
                 if event.key == K_ESCAPE:
                     self.game_over = True
-                if event.key == K_UP:
+                if event.key == K_w:
                     self.player_move(0, -1)
-                if event.key == K_DOWN:
+                if event.key == K_s:
                     self.player_move(0, 1)
-                if event.key == K_LEFT:
+                if event.key == K_a:
                     self.player_move(-1, 0)
-                if event.key == K_RIGHT:
+                if event.key == K_d:
                     self.player_move(1, 0)
 
 game = Game((12,10))  # 10x10のマップを作成
