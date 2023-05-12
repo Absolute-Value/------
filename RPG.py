@@ -1,5 +1,24 @@
 import random
-import sys
+import pygame
+from pygame.locals import *
+
+# ウィンドウのサイズ
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
+
+# マップのセルのサイズと色
+CELL_SIZE = 50
+PLAYER_COLOR = (0, 255, 0)  # プレイヤーの色 (緑)
+ENEMY_COLOR = (255, 165, 0)  # 敵の色 (オレンジ)
+BOSS_COLOR = (255, 0, 0)  # ボスの色 (赤)
+EMPTY_COLOR = (255, 255, 255)  # 空白セルの色 (白)
+
+# Pygameの初期化
+pygame.init()
+# ゲームウィンドウの作成
+window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+# タイトルバーに表示するゲームのタイトル
+pygame.display.set_caption("RPG Game")
 
 class Player:
     def __init__(self, x, y, game_map):
@@ -124,19 +143,25 @@ class Game:
         return enemies
 
     def print_map(self):
-        for row in self.map:
-            for tile in row:
-                if tile == "P":
-                    sys.stdout.write("\033[94mP\033[0m")  # プレイヤーを青色で表示
-                elif tile == "E":
-                    sys.stdout.write("\033[38;5;202mE\033[0m")  # 敵をオレンジ色で表示
-                elif tile == "B":
-                    sys.stdout.write("\033[91mB\033[0m")  # ボスを赤色で表示
+        for y in range(self.map_size):
+            for x in range(self.map_size):
+                cell_rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+                cell_color = EMPTY_COLOR
+
+                if self.player.x == x and self.player.y == y:
+                    cell_color = PLAYER_COLOR
+                elif (x, y) == self.boss_position:
+                    cell_color = BOSS_COLOR
                 else:
-                    sys.stdout.write(tile)
-                sys.stdout.write(" ")
-            sys.stdout.write("\n")
-        print()
+                    for enemy in self.enemies:
+                        if enemy.x == x and enemy.y == y:
+                            cell_color = ENEMY_COLOR
+                            break
+
+                pygame.draw.rect(window, cell_color, cell_rect)
+
+        pygame.display.flip()
+
 
     def move_player(self, command):
         if command == "w":
