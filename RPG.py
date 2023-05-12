@@ -64,15 +64,14 @@ class Game:
     def generate_enemies_positions(self):
         positions = []
         for _ in range(self.map_size):
-            x = random.randint(0, self.map_size - 1)
-            y = random.randint(0, self.map_size - 1)
+            x, y = self.get_random_empty_position()
             positions.append((x, y))
         return positions
 
     def generate_enemies(self):
         enemies = []
-        for _ in range(len(self.enemies_positions)):
-            x, y = self.enemies_positions[_]
+        for position in self.enemies_positions:
+            x, y = position
             enemy = Enemy(x, y, 2, 1)  # 体力: 2, 攻撃力: 1
             enemies.append(enemy)
         return enemies
@@ -84,13 +83,32 @@ class Game:
 
     def move_player(self, command):
         if command == "w":
-            self.player.move(0, -1)
+            dx, dy = 0, -1
         elif command == "s":
-            self.player.move(0, 1)
+            dx, dy = 0, 1
         elif command == "a":
-            self.player.move(-1, 0)
+            dx, dy = -1, 0
         elif command == "d":
-            self.player.move(1, 0)
+            dx, dy = 1, 0
+        else:
+            print("Invalid command!")
+            return
+
+        new_x = self.player.x + dx
+        new_y = self.player.y + dy
+
+        # 移動先がマップ内かどうかをチェック
+        if 0 <= new_x < self.map_size and 0 <= new_y < self.map_size:
+            if self.map[new_y][new_x] == "-":
+                # 移動先が空白の場合、プレイヤーを移動させる
+                self.map[self.player.y][self.player.x] = "-"  # 元の位置を空白に戻す
+                self.player.move(dx, dy)
+                self.map[self.player.y][self.player.x] = "P"  # 移動後の位置にプレイヤーを表示
+                self.encounter_enemy()
+            else:
+                print("You can't move there. Try again.")
+        else:
+            print("You can't move there. Try again.")
 
     def encounter_enemy(self):
         x = self.player.x
@@ -135,7 +153,6 @@ class Game:
             command = input("Enter your command (w/a/s/d): ")
             self.move_player(command)
             self.encounter_enemy()
-
 
 game = Game(5)  # 5x5のマップを作成
 game.run_game()
