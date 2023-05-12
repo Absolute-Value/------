@@ -135,13 +135,6 @@ class Game:
         map = [["-" for _ in range(self.map_size)] for _ in range(self.map_size)]
         return map
 
-    def generate_enemies_positions(self):
-        positions = []
-        for _ in range(self.map_size - 1):  # ボスを除く敵の位置を生成
-            x, y = self.get_random_empty_position()
-            positions.append((x, y))
-        return positions
-
     def generate_enemies(self):
         enemies = []
         for position in self.enemies_positions:
@@ -154,20 +147,17 @@ class Game:
         return enemies
 
     def print_map(self):
-        for y in range(len(self.map)):
-            for x in range(len(self.map[0])):
+        for y, map_row in enumerate(self.map):
+            for x, map_tile in enumerate(map_row):
                 cell_rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-                image = pygame.image.load("bg.png")  # 画像の読み込み
-
-                if self.player.x == x and self.player.y == y:
+                if map_tile == "P":
                     image = pygame.image.load("player.png")  # プレイヤー画像の読み込み
-                elif (x, y) == self.boss_position:
+                elif map_tile == "E":
+                    image = pygame.image.load("enemy.png")  # 画像の読み込み
+                elif map_tile == "B":
                     image = pygame.image.load("boss.png")  # 画像の読み込み
                 else:
-                    for enemy in self.enemies:
-                        if enemy.x == x and enemy.y == y:
-                            image = pygame.image.load("enemy.png")  # 画像の読み込み
-                            break
+                    image = pygame.image.load("bg.png")  # 画像の読み込み
 
                 image = pygame.transform.scale(image, (CELL_SIZE, CELL_SIZE))  # セルサイズにリサイズ
                 self.window.blit(image, cell_rect) # プレイヤー画像をブリット
@@ -196,12 +186,12 @@ class Game:
             and new_x < self.map_size
             and new_y >= 0
             and new_y < self.map_size
-            and self.map[new_y][new_x] != "#"
         ):
             if self.map[new_y][new_x] == "E" or self.map[new_y][new_x] == "B":
                 # 敵がいる場合、バトルを開始する
                 self.encounter_enemy(new_x, new_y)
             else:
+                self.map[self.player.y][self.player.x] = "-"
                 self.player.x = new_x
                 self.player.y = new_y
                 self.map[self.player.y][self.player.x] = "P"
