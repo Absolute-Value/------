@@ -3,11 +3,11 @@ import pygame
 from pygame.locals import *
 
 # ウィンドウのサイズ
-WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 800
+WINDOW_WIDTH = 600
+WINDOW_HEIGHT = 600
 
 # マップのセルのサイズと色
-CELL_SIZE = 80
+CELL_SIZE = 60
 BLACK_COLOR = (0, 0, 0)
 WHITE_COLOR = (255, 255, 255)
 
@@ -209,10 +209,10 @@ class Game:
 
     def print_battle(self):
         # status
-        status_left = 35
-        status_top = 35
-        status_width = 130
-        status_height = 100
+        status_left = WINDOW_WIDTH // 10
+        status_top = WINDOW_HEIGHT // 10
+        status_width = WINDOW_WIDTH // 5
+        status_height = WINDOW_WIDTH // 4
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_left, status_top, status_width, status_height))
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(status_left, status_top, status_width, status_height), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_left, status_top, status_width, status_height), 2)
@@ -225,10 +225,10 @@ class Game:
             self.draw_text(text, status_left + 10, status_top + 10 + i * 20, color=WHITE_COLOR)
 
         # command
-        command_left = 220
-        command_top = 15
-        command_width = 260
-        command_height = 60
+        command_left = WINDOW_WIDTH // 5 * 2
+        command_top = WINDOW_HEIGHT // 12
+        command_width = WINDOW_WIDTH // 2
+        command_height = WINDOW_HEIGHT // 8
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_left, command_top, command_width, command_height))
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(command_left, command_top, command_width, command_height), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_left, command_top, command_width, command_height), 2)
@@ -240,10 +240,10 @@ class Game:
             self.draw_text(text, command_left + 15, command_top + 15 + i * 20, color=WHITE_COLOR)
 
         # state
-        state_left = 100
-        state_top = 300
-        state_width = 300
-        state_height = 150
+        state_left = WINDOW_WIDTH // 6
+        state_top = WINDOW_HEIGHT // 5 * 3
+        state_width = WINDOW_WIDTH // 3 * 2
+        state_height = WINDOW_HEIGHT // 3
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(state_left, state_top, state_width, state_height))
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(state_left, state_top, state_width, state_height), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(state_left, state_top, state_width, state_height), 2)
