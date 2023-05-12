@@ -1,7 +1,7 @@
 # Python RPG
 
 pythonを用いてRPGゲームを実装しました。  
-基本はChatCPTに頼りました。
+(ベースはChatCPTで作りました)
 
 [![Python][Python.js]][Python.link]
 
