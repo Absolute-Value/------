@@ -67,26 +67,38 @@ class Enemy:
     def take_damage(self, damage):
         self.health -= damage
 
+class Boss(Enemy):
+    def __init__(self, x, y, health=5, attack_power=5):
+        super().__init__(x, y, health, attack_power)
+
 class Game:
     def __init__(self, map_size):
         self.map_size = map_size
         self.map = self.generate_map()
-        self.player = Player(0, 0, self.map)  # プレイヤーの初期位置を設定
+        self.player = Player(0, 0, self.map)
         self.enemies_positions = self.generate_enemies_positions()
+        self.boss_position = random.choice(self.enemies_positions)
         self.enemies = self.generate_enemies()
         self.game_over = False
 
-        # プレイヤーと敵の位置をマップに反映する
         self.map[self.player.y][self.player.x] = "P"
         for enemy in self.enemies:
             self.map[enemy.y][enemy.x] = "E"
-
+        self.map[self.boss_position[1]][self.boss_position[0]] = "B"  # ボスの位置をマップに反映
+        
     def get_random_empty_position(self):
         while True:
             x = random.randint(0, self.map_size - 1)
             y = random.randint(0, self.map_size - 1)
-            if self.map[x][y] == "-":
+            if self.map[y][x] == "-":
                 return x, y
+
+    def generate_enemies_positions(self):
+        positions = []
+        for _ in range(self.map_size - 1):  # ボスを除く敵の位置を生成
+            x, y = self.get_random_empty_position()
+            positions.append((x, y))
+        return positions
 
     def generate_map(self):
         map = [["-" for _ in range(self.map_size)] for _ in range(self.map_size)]
@@ -94,7 +106,7 @@ class Game:
 
     def generate_enemies_positions(self):
         positions = []
-        for _ in range(self.map_size):
+        for _ in range(self.map_size - 1):  # ボスを除く敵の位置を生成
             x, y = self.get_random_empty_position()
             positions.append((x, y))
         return positions
@@ -103,7 +115,10 @@ class Game:
         enemies = []
         for position in self.enemies_positions:
             x, y = position
-            enemy = Enemy(x, y, 2, 1)  # 体力: 2, 攻撃力: 1
+            if position == self.boss_position:
+                enemy = Boss(x, y, 5, 5)  # BossのHP: 5, 攻撃力: 5
+            else:
+                enemy = Enemy(x, y, 2, 1)  # 通常の敵のHP: 2, 攻撃力: 1
             enemies.append(enemy)
         return enemies
 
@@ -136,7 +151,7 @@ class Game:
                 self.player.move(dx, dy)
                 self.map[self.player.y][self.player.x] = "P"  # 移動後の位置にプレイヤーを表示
                 self.encounter_enemy(self.player.x, self.player.y)  # 新しい位置に敵がいるかチェック
-            elif self.map[new_y][new_x] == "E":
+            elif self.map[new_y][new_x] == "E" or self.map[new_y][new_x] == "B":
                 # 移動先に敵がいる場合、バトルを開始する
                 self.encounter_enemy(new_x, new_y)
             else:
