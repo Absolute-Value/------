@@ -41,8 +41,32 @@ class Player:
         print()
 
     def move(self, dx, dy):
-        self.x += dx
-        self.y += dy
+        new_x = self.x + dx
+        new_y = self.y + dy
+
+        # 移動先がマップ内かどうかをチェック
+        if 0 <= new_x < len(self.game_map[0]) and 0 <= new_y < len(self.game_map):
+            if self.game_map[new_y][new_x] == "-":
+                # 移動先が空白の場合、プレイヤーを移動させる
+                self.game_map[self.y][self.x] = "-"  # 元の位置を空白に戻す
+                self.x = new_x
+                self.y = new_y
+                self.game_map[self.y][self.x] = "P"  # 移動後の位置にプレイヤーを表示
+                self.encounter_enemy(self.x, self.y)  # 新しい位置に敵がいるかチェック
+            elif self.game_map[new_y][new_x] == "E" or self.game_map[new_y][new_x] == "B":
+                # 移動先に敵がいる場合、バトルを開始する
+                self.encounter_enemy(new_x, new_y)
+            else:
+                print("You can't move there. Try again.")
+        else:
+            print("You can't move there. Try again.")
+
+
+    def encounter_enemy(self, x, y):
+        for enemy in self.enemies:
+            if enemy.x == x and enemy.y == y:
+                print("Encountered an enemy!")
+                self.battle(enemy)
 
     def attack(self, enemy):
         enemy.health -= self.attack_power
@@ -143,8 +167,8 @@ class Game:
         return enemies
 
     def print_map(self):
-        for y in range(self.map_size):
-            for x in range(self.map_size):
+        for y in range(len(self.map)):
+            for x in range(len(self.map[0])):
                 cell_rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
                 cell_color = EMPTY_COLOR
 
@@ -167,38 +191,21 @@ class Game:
 
         pygame.display.flip()
 
-    def move_player(self, command):
-        if command == "w":
-            dx, dy = 0, -1
-        elif command == "s":
-            dx, dy = 0, 1
-        elif command == "a":
-            dx, dy = -1, 0
-        elif command == "d":
-            dx, dy = 1, 0
-        else:
-            print("Invalid command!")
-            return
-
+    def player_move(self, dx, dy):
         new_x = self.player.x + dx
         new_y = self.player.y + dy
 
-        # 移動先がマップ内かどうかをチェック
-        if 0 <= new_x < self.map_size and 0 <= new_y < self.map_size:
-            if self.map[new_y][new_x] == "-":
-                # 移動先が空白の場合、プレイヤーを移動させる
-                self.map[self.player.y][self.player.x] = "-"  # 元の位置を空白に戻す
-                self.player.move(dx, dy)
-                self.map[self.player.y][self.player.x] = "P"  # 移動後の位置にプレイヤーを表示
-                self.encounter_enemy(self.player.x, self.player.y)  # 新しい位置に敵がいるかチェック
-            elif self.map[new_y][new_x] == "E" or self.map[new_y][new_x] == "B":
-                # 移動先に敵がいる場合、バトルを開始する
-                self.encounter_enemy(new_x, new_y)
-            else:
-                print("You can't move there. Try again.")
-        else:
-            print("You can't move there. Try again.")
-
+        if (
+            new_x >= 0
+            and new_x < self.map_size
+            and new_y >= 0
+            and new_y < self.map_size
+            and self.map[new_y][new_x] != "#"
+        ):
+            self.map[self.player.y][self.player.x] = "."
+            self.player.x = new_x
+            self.player.y = new_y
+            self.map[self.player.y][self.player.x] = "P"
 
     def encounter_enemy(self, x, y):
         for enemy in self.enemies:
@@ -237,14 +244,10 @@ class Game:
 
     def run_game(self):
         while not self.game_over:
+            self.handle_events()
             self.print_map()
-            command = input("Enter your command (w/a/s/d): ")
-            self.move_player(command)
-            self.encounter_enemy(self.player.x, self.player.y)
 
-            if len(self.enemies) == 0:
-                print("All enemies defeated! You win!")
-                exit()
+        pygame.quit()
 
     def draw_text(self, text, x, y, font_size=24, color=(0, 0, 0)):
         font = pygame.font.Font(None, font_size)
@@ -252,6 +255,23 @@ class Game:
         text_rect = text_surface.get_rect()
         text_rect.topleft = (x, y)
         window.blit(text_surface, text_rect)
+
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                self.game_over = True
+
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    self.game_over = True
+                if event.key == K_UP:
+                    self.player_move(0, -1)
+                if event.key == K_DOWN:
+                    self.player_move(0, 1)
+                if event.key == K_LEFT:
+                    self.player_move(-1, 0)
+                if event.key == K_RIGHT:
+                    self.player_move(1, 0)
 
 game = Game(10)  # 10x10のマップを作成
 game.run_game()
