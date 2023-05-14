@@ -54,7 +54,7 @@ class Game:
             self.entity_map[5][10] = bias
             bias += 1
         if self.stage == (1,3):
-            self.entities.append(Entity(5, 3, "鍵"))
+            self.entities.append(Entity(5, 3, "カギ"))
             self.entity_map[3][5] = bias
             bias += 1
         for i in range(ENEMY_NUM):
@@ -80,7 +80,7 @@ class Game:
             cell_rect = pygame.Rect(entity.x * CELL_SIZE, entity.y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
             if entity.name == "ポーション":
                 self.window.blit(self.potion_image, cell_rect) # 画像をブリット
-            elif entity.name == "鍵":
+            elif entity.name == "カギ":
                 self.window.blit(self.key_image, cell_rect) # 画像をブリット
             elif entity.name == "BoneKing":
                 self.window.blit(self.boss_image, cell_rect) # 画像をブリット
@@ -107,11 +107,11 @@ class Game:
             target = self.entity_map[new_y][new_x]
             if target > 1:
                 entity = self.entities[target-2]
-                if entity.name in ["ポーション", "鍵"]:
+                if entity.name in ["ポーション", "カギ"]:
                     self.states = [f"{entity.name}を てにいれた！"]
                     self.entities.remove(entity)
-                    if entity.name == "鍵":
-                        self.player.inventory["鍵"] = 1
+                    if entity.name == "カギ":
+                        self.player.inventory["カギ"] = 1
                     else:
                         if "ポーション" in self.player.inventory.keys():
                             self.player.inventory["ポーション"] += 1
