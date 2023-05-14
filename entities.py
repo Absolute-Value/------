@@ -12,11 +12,8 @@ class Enemy(Entity):
         super().__init__(x, y, name, health, attack_power, exp)
 
     def attack(self, player):
-        if player.defense:
-            return "Player defended the attack!"
-        else:
-            player.take_damage(self.attack_power)
-            return f"プレイヤーは{self.attack_power}ダメージをうけた！"
+        player.take_damage(self.attack_power)
+        return [f"{self.name}の こうげき", f"{self.attack_power}ダメージをうけた！"]
 
     def take_damage(self, damage):
         self.health -= damage

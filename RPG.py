@@ -143,8 +143,11 @@ class Game:
 
     def battle(self, enemy):
         self.states = [f"{enemy.name}が あらわれた！"]
+        self.print_battle(enemy)
+        pygame.display.update()
+        self.wait_input()
         while self.player.health > 0 and enemy.health > 0:
-            self.print_map()
+            self.states = ["どうする？"]
             self.print_battle(enemy)
             pygame.display.update()
 
@@ -157,14 +160,18 @@ class Game:
                         pygame.event.clear()
                         self.states = []
                         if event.key == K_n:
-                            self.states.append(self.player.attack(enemy))
-                            command_entered = True
-                        elif event.key == K_m:
-                            self.player.defense = True
+                            self.states.extend(self.player.attack(enemy))
                             command_entered = True
 
             if enemy.health > 0: # 敵のターン
-                self.states.append(enemy.attack(self.player))
+                self.print_battle(enemy)
+                pygame.display.update()
+                self.wait_input()
+                self.states = enemy.attack(self.player)
+                self.print_battle(enemy)
+                pygame.display.update()
+                self.wait_input()
+            
 
         if self.player.health == 0:
             self.game_over = True

@@ -12,7 +12,7 @@ class Player:
 
     def attack(self, enemy):
         enemy.health -= self.attack_power
-        return f"{enemy.name}に{self.attack_power}ダメージあたえた"
+        return ["プレイヤーの こうげき！", f"{enemy.name}に{self.attack_power}ダメージ"]
 
     def take_damage(self, damage):
         self.health = max(0,self.health-damage)
