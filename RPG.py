@@ -93,7 +93,7 @@ class Game:
             self.stage = (self.stage[0], self.stage[1]+1)
             self.map = MAP[self.stage]
             self.player.x = 0
-            self.update_entity_map()
+            self.init_entity_map()
             self.entities = self.generate_enemies()
         elif (new_x >= 0 and new_x < self.map_size[0] and new_y >= 0 and new_y < self.map_size[1] and (self.map[new_y][new_x] == 0)):
             if self.entity_map[new_y][new_x] > 1:
