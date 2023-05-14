@@ -1,14 +1,15 @@
 class Entity:
-    def __init__(self, x:int, y:int, name:str="None", health:int=1, attack_power:int=1):
+    def __init__(self, x:int, y:int, name:str="None", health:int=1, attack_power:int=1, exp:int=0):
         self.x = x
         self.y = y
         self.health = health
         self.name = name
         self.attack_power = attack_power
+        self.exp = exp
         
 class Enemy(Entity):
-    def __init__(self, x:int, y:int, name:str="Bone", health:int=2, attack_power:int=1):
-        super().__init__(x, y, name, health, attack_power)
+    def __init__(self, x:int, y:int, name:str="Bone", health:int=2, attack_power:int=1, exp:int=10):
+        super().__init__(x, y, name, health, attack_power, exp)
 
     def attack(self, player):
         if player.defense:

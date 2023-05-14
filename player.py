@@ -15,20 +15,17 @@ class Player:
         return f"Player did {self.attack_power} damage to {enemy.name} ."
 
     def take_damage(self, damage):
-        self.health -= damage
-        if self.health <= 0:
-            print("Player was killed ! Game over .")
-            self.game_over = True
+        self.health = max(0,self.health-damage)
 
     def heal(self, value=0.3):
-        self.health += int(self.max_health*value)
-        if self.health > self.max_health:
-            self.health = self.max_health
+        self.health = min(self.max_health, self.health + int(self.max_health*value))
         
     def gain_experience(self, experience):
         self.experience += experience
+        states = [f"Player got {experience} exp ."]
         if self.experience >= self.experience_to_level_up:
-            self.level_up()
+            states.extend(self.level_up())
+        return states
 
     def level_up(self):
         self.level += 1
@@ -36,5 +33,4 @@ class Player:
         self.health = self.max_health
         self.experience -= self.experience_to_level_up
         self.experience_to_level_up *= 2
-        print(f"Player leveled up ! ({self.level-1}->{self.level}) ")
-        print("HP increased and fully healed .")
+        return [f"Player leveled up ! ({self.level-1}->{self.level})", "HP increased and fully healed ."]
