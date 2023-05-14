@@ -7,7 +7,8 @@ from define import *
 
 class Game:
     def __init__(self, cell_size=60,): # 12x10のマップを作成
-        self.map = MAP["1-2"]
+        self.stage = INIT_STAGE
+        self.map = MAP[self.stage]
         self.map_size = (len(self.map[0]), len(self.map))
         self.entity_map = self.generate_map()
         self.player = Player(5, 5, self.entity_map)
@@ -88,7 +89,23 @@ class Game:
         new_x = self.player.x + dx
         new_y = self.player.y + dy
 
-        if (new_x >= 0 and new_x < self.map_size[0] and new_y >= 0 and new_y < self.map_size[1] and (self.map[new_y][new_x] == 0)):
+        if (new_x < 0 and self.stage[1] > 1):
+            self.stage = (self.stage[0], self.stage[1]-1)
+            self.map = MAP[self.stage]
+            self.player.x = self.map_size[0] - 1
+            self.entity_map[self.player.y][self.player.x] = 1
+            self.enemies_positions = self.generate_enemies_positions()
+            self.boss_position = random.choice(self.enemies_positions)
+            self.enemies = self.generate_enemies()
+        elif (new_x == self.map_size[0] and self.stage[1] < 2):
+            self.stage = (self.stage[0], self.stage[1]+1)
+            self.map = MAP[self.stage]
+            self.player.x = 0
+            self.entity_map[self.player.y][self.player.x] = 1
+            self.enemies_positions = self.generate_enemies_positions()
+            self.boss_position = random.choice(self.enemies_positions)
+            self.enemies = self.generate_enemies()
+        elif (new_x >= 0 and new_x < self.map_size[0] and new_y >= 0 and new_y < self.map_size[1] and (self.map[new_y][new_x] == 0)):
             if self.entity_map[new_y][new_x] > 1:
                 # 敵がいる場合、バトルを開始する
                 self.encounter_enemy(new_x, new_y)
