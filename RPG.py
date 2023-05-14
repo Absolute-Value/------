@@ -48,11 +48,12 @@ class Game:
     def generate_enemies(self):
         self.entities = []
         for i in range(ENEMY_NUM):
-            x, y = self.get_random_empty_position()
-            self.entity_map[y][x] = i + 2
-            if i == 0 and self.stage == (1,1):
-                enemy = Enemy(x, y, "BoneKing", 5, 3, 5) # BossのHP: 5, 攻撃力: 5
+            if i == 0 and self.stage == (1,2):
+                enemy = Enemy(10, 5, "BoneKing", 5, 3, 5) # BossのHP: 5, 攻撃力: 5
+                self.entity_map[5][10] = i + 2
             else:
+                x, y = self.get_random_empty_position()
+                self.entity_map[y][x] = i + 2
                 enemy = Enemy(x, y, "Bone") # 通常の敵のHP: 2, 攻撃力: 1
             self.entities.append(enemy)
 
@@ -89,7 +90,7 @@ class Game:
             self.player.x = self.map_size[0] - 1
             self.init_entity_map()
             self.generate_enemies()
-        elif (new_x == self.map_size[0] and self.stage[1] < 2): # 右ステージへの移動
+        elif (new_x == self.map_size[0] and self.stage[1] < len(MAP)): # 右ステージへの移動
             self.stage = (self.stage[0], self.stage[1]+1)
             self.map = MAP[self.stage]
             self.player.x = 0
