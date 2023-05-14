@@ -142,49 +142,62 @@ class Game:
             print("You can't move there . Try again .")
 
     def battle(self, enemy):
-        self.states = [f"{enemy.name}が あらわれた！"]
-        self.print_battle(enemy)
-        pygame.display.update()
-        self.wait_input()
+        self.states = [f"{enemy.name}が あらわれた！", "どうする？"]
+        self.command = 0
         while self.player.health > 0 and enemy.health > 0:
-            self.states = ["どうする？"]
             self.print_battle(enemy)
             pygame.display.update()
 
             # プレイヤーのターン
-            self.player.defense = False
             command_entered = False
             while not command_entered:
                 for event in pygame.event.get():
                     if event.type == KEYDOWN:
-                        pygame.event.clear()
-                        self.states = []
                         if event.key == K_n:
-                            self.states.extend(self.player.attack(enemy))
-                            command_entered = True
-
+                            if self.command == 0:
+                                self.states = []
+                                self.states.extend(self.player.attack(enemy))
+                                command_entered = True
+                            elif self.command == 2:
+                                self.states = ["にげられなかった！"]
+                                command_entered = True
+                            else:
+                                command_list = ["こうげき", "じゅもん", "にげる", "どうぐ"]
+                                self.states = [f"{command_list[self.command]}は まだつかえない！", "どうする？"]
+                        elif event.key == K_w:
+                            self.command = max(0, self.command - 1)
+                        elif event.key == K_s:
+                            self.command = min(3, self.command + 1)
+                            
+                        self.print_battle(enemy)
+                        pygame.display.update()
+                            
             if enemy.health > 0: # 敵のターン
-                self.print_battle(enemy)
-                pygame.display.update()
                 self.wait_input()
                 self.states = enemy.attack(self.player)
-                self.print_battle(enemy)
-                pygame.display.update()
-                self.wait_input()
-            
+                if self.player.health > 0:
+                    self.print_battle(enemy)
+                    pygame.display.update()
+                    self.wait_input()
+                    self.states = ["どうする？"]
 
-        if self.player.health == 0:
+        print("now here")
+        if self.player.health <= 0:
             self.game_over = True
             self.states.extend([f"プレイヤーは しんでしまった！"])
-            
-            self.print_map()
             self.print_battle(enemy)
+            pygame.display.update()
             self.wait_input()
-                            
+                
         else:
             self.entities.remove(enemy)
             self.states.append(f"{enemy.name}を たおした！")
             self.states.extend(self.player.gain_experience(enemy.exp))
+            if self.player.experience >= self.player.experience_to_level_up:
+                self.print_map()
+                self.print_battle(enemy)
+                self.wait_input()
+                self.states = self.player.level_up()
             if random.random() < 0.2:
                 self.entities.append(Entity(enemy.x, enemy.y, "heart"))
                 self.states.append(f"{enemy.name}は かいふくを おとした")
@@ -216,7 +229,7 @@ class Game:
         status_text = [
             f"LV {self.player.level:3d}",
             f"HP {self.player.health:3d}/{self.player.max_health:3d}",
-            f"MP {self.player.health:3d}/{self.player.max_health:3d}",
+            f"MP {self.player.mp:3d}/{self.player.max_mp:3d}",
             f"E  {self.player.experience:3d}/{self.player.experience_to_level_up:3d}"
         ]
         for i, text in enumerate(status_text):
@@ -250,18 +263,19 @@ class Game:
 
         # command
         command_pos = (self.window_size[0] // 3 * 2, self.window_size[1] // 10)
-        command_size = (self.window_size[0] // 4, self.window_size[1] // 4)
+        command_size = (self.window_size[0] // 4.5, self.window_size[1] // 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]))
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 2)
         status_text = [
-            "> こうげき",
-            "  じゅもん",
-            "  にげる",
-            "  どうぐ"
+            "こうげき",
+            "じゅもん",
+            "にげる",
+            "どうぐ"
         ]
         for i, text in enumerate(status_text):
-            self.draw_text(text, command_pos[0] + 12, command_pos[1] + 10 + i * 30, color=WHITE_COLOR)
+            self.draw_text(text, command_pos[0] + 30, command_pos[1] + 10 + i * 30, color=WHITE_COLOR)
+        self.draw_text('>', command_pos[0] + 12, command_pos[1] + 10 + self.command * 30, color=WHITE_COLOR)
             
         self.print_states()
 

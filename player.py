@@ -4,6 +4,8 @@ class Player:
         self.y = y
         self.max_health = 5
         self.health = self.max_health
+        self.mp = 5
+        self.max_mp = 5
         self.attack_power = 1
         self.defense = False
         self.level = 1
@@ -23,12 +25,10 @@ class Player:
     def gain_experience(self, experience):
         self.experience += experience
         states = [f"{experience}けいけんち をてにいれた"]
-        if self.experience >= self.experience_to_level_up:
-            states.extend(self.level_up())
         return states
 
     def level_up(self):
-        status = [f"レベルアップ！"]
+        status = [f"レベルアップ！", "ステータスが上昇！"]
         self.level += 1
         status.append(f"HP ({self.max_health} -> {self.max_health+2})")
         self.max_health += 2
