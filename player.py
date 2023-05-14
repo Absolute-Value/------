@@ -20,6 +20,11 @@ class Player:
             print("Player was killed ! Game over .")
             self.game_over = True
 
+    def heal(self, value=0.3):
+        self.health += int(self.max_health*value)
+        if self.health > self.max_health:
+            self.health = self.max_health
+        
     def gain_experience(self, experience):
         self.experience += experience
         if self.experience >= self.experience_to_level_up:

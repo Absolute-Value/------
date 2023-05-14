@@ -73,7 +73,9 @@ class Game:
         
         for entity in self.entities:
             cell_rect = pygame.Rect(entity.x * self.cell_size, entity.y * self.cell_size, self.cell_size, self.cell_size)
-            if entity.name == "BoneKing":
+            if entity.name == "heart":
+                self.window.blit(self.heart_image, cell_rect) # 画像をブリット
+            elif entity.name == "BoneKing":
                 self.window.blit(self.boss_image, cell_rect) # 画像をブリット
             else:
                 self.window.blit(self.enemy_image, cell_rect) # 画像をブリット
@@ -95,9 +97,16 @@ class Game:
             self.init_entity_map()
             self.generate_enemies()
         elif (new_x >= 0 and new_x < self.map_size[0] and new_y >= 0 and new_y < self.map_size[1] and (self.map[new_y][new_x] == 0)):
-            if self.entity_map[new_y][new_x] > 1:
-                # 移動先に敵がいる場合、バトルを開始する
-                self.battle(self.entities[self.entity_map[new_y][new_x]-2])
+            target = self.entity_map[new_y][new_x]
+            if target > 1:
+                entity = self.entities[target-2]
+                if entity.name == "heart":
+                    self.player.heal()
+                    self.entities.remove(entity)
+                    self.init_entity_map()
+                    self.update_entity_map()
+                else: # 移動先に敵がいる場合、バトルを開始する
+                    self.battle(entity)
             else:
                 self.entity_map[self.player.y][self.player.x] = 0
                 self.player.x = new_x
@@ -139,6 +148,8 @@ class Game:
         else:
             self.player.gain_experience(10)
             self.entities.remove(enemy)
+            if random.random() < 0.2:
+                self.entities.append(Entity(enemy.x, enemy.y, "heart"))
             self.init_entity_map()
             self.update_entity_map()
             self.states.append(f"Player killed {enemy.name} .")
