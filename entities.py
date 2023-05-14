@@ -8,8 +8,9 @@ class Entity:
         self.exp = exp
         
 class Enemy(Entity):
-    def __init__(self, x:int, y:int, name:str="Bone", health:int=3, attack_power:int=1, exp:int=1):
+    def __init__(self, x:int, y:int, name:str="Bone", health:int=3, attack_power:int=1, exp:int=1, escape_rate:float=0.9):
         super().__init__(x, y, name, health, attack_power, exp)
+        self.escape_rate = escape_rate
 
     def attack(self, player):
         player.health = max(0,player.health-self.attack_power)

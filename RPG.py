@@ -50,7 +50,7 @@ class Game:
         self.entities = []
         bias = 2
         if self.stage == (1,2):
-            self.entities.append(Enemy(10, 5, "BoneKing", 10, 3, 5)) # BossのHP: 5, 攻撃力: 3, 経験値: 5
+            self.entities.append(Enemy(10, 5, "BoneKing", 10, 3, 5, escape_rate=0)) # BossのHP: 5, 攻撃力: 3, 経験値: 5
             self.entity_map[5][10] = bias
             bias += 1
         if self.stage == (1,3):
@@ -157,11 +157,16 @@ class Game:
                                 self.states = []
                                 self.states.extend(self.player.attack(enemy))
                                 command_entered = True
+                            elif self.selected_command == 1:
+                                self.states = [f"じゅもんを おぼえていない！", "どうする？"]
                             elif self.selected_command == 2:
-                                self.states = ["にげられなかった！"]
                                 command_entered = True
+                                if random.random() < enemy.escape_rate:
+                                    self.states = ["うまくにげられた！"]
+                                else:
+                                    self.states = ["にげられなかった！"]
                             else:
-                                self.states = [f"{BATTLE_COMMAND[self.selected_command]}は まだつかえない！", "どうする？"]
+                                self.states = [f"どうぐを もっていない！", "どうする？"]
                         elif event.key == K_w:
                             self.selected_command = max(0, self.selected_command - 1)
                         elif event.key == K_s:
@@ -170,6 +175,8 @@ class Game:
                         self.print_battle(enemy)
                         pygame.display.update()
                             
+            if self.states == ["うまくにげられた！"]:
+                break
             if enemy.health > 0: # 敵のターン
                 self.wait_input()
                 self.states = enemy.attack(self.player)
@@ -185,7 +192,10 @@ class Game:
             self.print_battle(enemy)
             pygame.display.update()
             self.wait_input()
-                
+        elif enemy.health > 0:
+            self.print_battle(enemy)
+            pygame.display.update()
+            self.wait_input()
         else:
             self.entities.remove(enemy)
             self.states.append(f"{enemy.name}を たおした！")

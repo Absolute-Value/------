@@ -7,7 +7,6 @@ class Player:
         self.mp = 5
         self.max_mp = 5
         self.attack_power = 1
-        self.defense = False
         self.level = 1
         self.experience = 0
         self.experience_to_level_up = 2
