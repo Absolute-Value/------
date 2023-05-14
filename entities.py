@@ -1,5 +1,5 @@
 class Entity:
-    def __init__(self, x, y, name="None", health=1, attack_power=1):
+    def __init__(self, x:int, y:int, name:str="None", health:int=1, attack_power:int=1):
         self.x = x
         self.y = y
         self.health = health
@@ -7,8 +7,8 @@ class Entity:
         self.attack_power = attack_power
         
 class Enemy(Entity):
-    def __init__(self, x, y, name="Bone", health=2, attack_power=1):
-        super().__init__(x, y, name, health)
+    def __init__(self, x:int, y:int, name:str="Bone", health:int=2, attack_power:int=1):
+        super().__init__(x, y, name, health, attack_power)
 
     def attack(self, player):
         if player.defense:
