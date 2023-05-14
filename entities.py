@@ -26,4 +26,4 @@ class Enemy(Entity):
             
 class Boss(Enemy):
      def __init__(self, x:int, y:int, name:str="BoneKing", health:int=10, attack_power:int=3, exp:int=5, escape_rate:float=0, drop_items:dict={"ポーション":0.5}):
-        super().__init__(x, y, name, health, attack_power, exp, escape_rate)
+        super().__init__(x, y, name, health, attack_power, exp, escape_rate, drop_items)
