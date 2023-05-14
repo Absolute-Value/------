@@ -12,7 +12,7 @@ class Game:
         self.map_size = (len(self.map[0]), len(self.map))
         self.player = Player()
         self.init_entity_map()
-        self.generate_enemies()
+        self.generate_entities()
         self.game_over = False
         
         self.window_size = [m * CELL_SIZE for m in self.map_size]
@@ -29,6 +29,7 @@ class Game:
         self.player_image = pygame.transform.scale(pygame.image.load("images/player.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
         self.enemy_image = pygame.transform.scale(pygame.image.load("images/enemy.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
         self.boss_image = pygame.transform.scale(pygame.image.load("images/boss.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.key_image = pygame.transform.scale(pygame.image.load("images/key.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
         
     def init_entity_map(self):
         self.entity_map = [[0 for _ in range(self.map_size[0])] for _ in range(self.map_size[1])]
@@ -45,17 +46,21 @@ class Game:
             if self.entity_map[y][x] == 0 and self.map[y][x] == 0:
                 return x, y
             
-    def generate_enemies(self):
+    def generate_entities(self):
         self.entities = []
+        bias = 2
+        if self.stage == (1,2):
+            self.entities.append(Enemy(10, 5, "BoneKing", 10, 3, 5)) # BossのHP: 5, 攻撃力: 3, 経験値: 5
+            self.entity_map[5][10] = bias
+            bias += 1
+        if self.stage == (1,3):
+            self.entities.append(Entity(5, 3, "Key"))
+            self.entity_map[3][5] = bias
+            bias += 1
         for i in range(ENEMY_NUM):
-            if i == 0 and self.stage == (1,2):
-                enemy = Enemy(10, 5, "BoneKing", 5, 3, 5) # BossのHP: 5, 攻撃力: 5
-                self.entity_map[5][10] = i + 2
-            else:
-                x, y = self.get_random_empty_position()
-                self.entity_map[y][x] = i + 2
-                enemy = Enemy(x, y, "Bone") # 通常の敵のHP: 2, 攻撃力: 1
-            self.entities.append(enemy)
+            x, y = self.get_random_empty_position()
+            self.entities.append(Enemy(x, y, "Bone")) # 通常の敵のHP: 3, 攻撃力: 1
+            self.entity_map[y][x] = i + bias
 
     def print_map(self):
         for y, map_row in enumerate(self.map):
@@ -75,6 +80,8 @@ class Game:
             cell_rect = pygame.Rect(entity.x * CELL_SIZE, entity.y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
             if entity.name == "heart":
                 self.window.blit(self.heart_image, cell_rect) # 画像をブリット
+            elif entity.name == "Key":
+                self.window.blit(self.key_image, cell_rect) # 画像をブリット
             elif entity.name == "BoneKing":
                 self.window.blit(self.boss_image, cell_rect) # 画像をブリット
             else:
@@ -89,13 +96,13 @@ class Game:
             self.map = MAP[self.stage]
             self.player.x = self.map_size[0] - 1
             self.init_entity_map()
-            self.generate_enemies()
+            self.generate_entities()
         elif (new_x == self.map_size[0] and self.stage[1] < len(MAP)): # 右ステージへの移動
             self.stage = (self.stage[0], self.stage[1]+1)
             self.map = MAP[self.stage]
             self.player.x = 0
             self.init_entity_map()
-            self.generate_enemies()
+            self.generate_entities()
         elif (new_x >= 0 and new_x < self.map_size[0] and new_y >= 0 and new_y < self.map_size[1] and (self.map[new_y][new_x] == 0)):
             target = self.entity_map[new_y][new_x]
             if target > 1:
@@ -112,6 +119,18 @@ class Game:
                     
                     self.init_entity_map()
                     self.update_entity_map()
+                elif entity.name == "Key":
+                    self.entities.remove(entity)
+                    self.states = [f"鍵を手に入れた！"]
+                    
+                    self.print_map()
+                    self.print_status()
+                    self.print_states()
+                    self.wait_input()
+                    
+                    self.init_entity_map()
+                    self.update_entity_map()
+                    
                 else: # 移動先に敵がいる場合、バトルを開始する
                     self.battle(entity)
             else:
