@@ -113,7 +113,11 @@ class Game:
                     if entity.name == "鍵":
                         self.player.inventory["鍵"] = 1
                     else:
-                        self.player.inventory["ポーション"] += 1
+                        if "ポーション" in self.player.inventory.keys():
+                            self.player.inventory["ポーション"] += 1
+                        else:
+                            self.player.inventory["ポーション"] = 1
+                            
                     self.print_map()
                     self.print_status()
                     self.print_states()

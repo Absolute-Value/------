@@ -32,6 +32,9 @@ class Player:
         status.append(f"HP ({self.max_health} -> {self.max_health+2})")
         self.max_health += 2
         self.health = self.max_health
+        status.append(f"MP ({self.max_mp} -> {self.mp+1})")
+        self.max_mp += 1
+        self.mp = min(self.max_mp, self.mp+10)
         if self.level % 2 == 0:
             status.append(f"AT ({self.max_health} -> {self.max_health+1})")
             self.attack_power += 1
