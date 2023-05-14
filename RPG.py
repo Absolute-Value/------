@@ -40,7 +40,7 @@ class Game:
         self.entities = []
         bias = 2
         if self.stage == (1,2):
-            self.entities.append(Enemy(10, 5, "BoneKing", 10, 3, 5, escape_rate=0)) # BossのHP: 5, 攻撃力: 3, 経験値: 5
+            self.entities.append(Boss(10, 5))
             self.entity_map[5][10] = bias
             bias += 1
         if self.stage == (1,3):
@@ -49,7 +49,7 @@ class Game:
             bias += 1
         for i in range(ENEMY_NUM):
             x, y = self.get_random_empty_position()
-            self.entities.append(Enemy(x, y, "Bone")) # 通常の敵のHP: 3, 攻撃力: 1
+            self.entities.append(Enemy(x, y)) # 通常の敵のHP: 3, 攻撃力: 1
             self.entity_map[y][x] = i + bias
 
     def print_map(self):
@@ -86,17 +86,16 @@ class Game:
             target = self.entity_map[new_y][new_x]
             if target > 1:
                 entity = self.entities[target-2]
-                if entity.name in ["ポーション", "カギ"]:
-                    
+                if entity.name in TOOL_INFO.keys():
                     self.states = [f"{entity.name}を てにいれた！"]
                     self.entities.remove(entity)
                     if entity.name == "カギ":
                         self.player.inventory["カギ"] = 1
                     else:
-                        if "ポーション" in self.player.inventory.keys():
-                            self.player.inventory["ポーション"] += 1
+                        if entity.name in self.player.inventory.keys():
+                            self.player.inventory[entity.name] += 1
                         else:
-                            self.player.inventory["ポーション"] = 1
+                            self.player.inventory[entity.name] = 1
                             
                     self.command = list(self.player.inventory.keys())
                     self.selected_command = 0
@@ -133,12 +132,12 @@ class Game:
                         if event.key == K_n:
                             if open_inventory:
                                 item_name = self.command[self.selected_command]
-                                if item_name == "ポーション":
+                                if item_name in ["やくそう", "ポーション"]:
                                     command_entered = True
                                     self.player.inventory[item_name] -= 1
                                     if self.player.inventory[item_name] == 0:
                                         del self.player.inventory[item_name]
-                                    self.states = [f"{item_name}を つかった！"] + self.player.heal(3)
+                                    self.states = [f"{item_name}を つかった！"] + self.player.heal(2 if item_name == "やくそう" else 5)
                                 else:
                                     self.states = [f"ここでは つかえない！", "どうする？"]
                             else:
@@ -202,9 +201,11 @@ class Game:
                 self.print_battle(enemy)
                 self.wait_input()
                 self.states = self.player.level_up()
-            if random.random() < 0.2:
-                self.entities.append(Entity(enemy.x, enemy.y, "ポーション"))
-                self.states.append(f"{enemy.name}は ポーションを おとした")
+            
+            entity = enemy.drop()
+            if entity:
+                self.entities.append(entity)
+                self.states.append(f"{enemy.name}は {entity.name}を おとした")
 
             self.print_map()
             self.print_battle(enemy)
@@ -287,28 +288,33 @@ class Game:
         command_entered = False
         self.command = list(self.player.inventory.keys())
         self.selected_command = 0
-        self.states = [f"しょじ {self.player.inventory[self.command[self.selected_command]]:3d}こ"] + TOOL_INFO[self.command[self.selected_command]]
+        if len(self.player.inventory) > 0:
+            self.states = [f"しょじ {self.player.inventory[self.command[self.selected_command]]:3d}こ"] + TOOL_INFO[self.command[self.selected_command]]
+        else:
+            self.states = ["どうぐを もっていない！"]
         self.print_stats_and_command()
         
         while not command_entered:
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
-                    if event.key == K_n:
+                    if event.key == K_n and len(self.player.inventory) > 0:
                         item_name = self.command[self.selected_command]
-                        if item_name == "ポーション":
+                        if item_name in ["やくそう", "ポーション"]:
                             command_entered = True
                             self.player.inventory[item_name] -= 1
                             if self.player.inventory[item_name] == 0:
                                 del self.player.inventory[item_name]
-                            self.states = [f"{item_name}を つかった！"] + self.player.heal(3)
+                            self.states = [f"{item_name}を つかった！"] + self.player.heal(2 if item_name == "やくそう" else 5)
+                            self.print_stats_and_command()
+                            self.wait_input()
                         else:
                             self.states = [f"ここでは つかえない！"]
                     elif event.key == K_m:
                         command_entered = True
-                    elif event.key == K_w:
+                    elif event.key == K_w and len(self.player.inventory) > 0:
                         self.selected_command = max(0, self.selected_command - 1)
                         self.states = [f"しょじ {self.player.inventory[self.command[self.selected_command]]:3d}こ"] + TOOL_INFO[self.command[self.selected_command]]
-                    elif event.key == K_s:
+                    elif event.key == K_s and len(self.player.inventory) > 0:
                         self.selected_command = min(len(self.command)-1, self.selected_command + 1)
                         self.states = [f"しょじ {self.player.inventory[self.command[self.selected_command]]:3d}こ"] + TOOL_INFO[self.command[self.selected_command]]
                     self.print_stats_and_command()
@@ -330,7 +336,7 @@ class Game:
                     self.player_move(-1, 0)
                 if event.key == K_d:
                     self.player_move(1, 0)
-                if event.key == K_i and len(self.player.inventory) > 0:
+                if event.key == K_i:
                     self.open_inventory()
                     
     def run_game(self):

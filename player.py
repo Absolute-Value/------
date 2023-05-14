@@ -10,7 +10,7 @@ class Player:
         self.level = 1
         self.experience = 0
         self.experience_to_level_up = 2
-        self.inventory = {"ポーション":1}
+        self.inventory = {"やくそう":1}
 
     def attack(self, enemy):
         enemy.health -= self.attack_power
