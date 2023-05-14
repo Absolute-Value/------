@@ -108,6 +108,7 @@ class Game:
             if target > 1:
                 entity = self.entities[target-2]
                 if entity.name in ["ポーション", "カギ"]:
+                    
                     self.states = [f"{entity.name}を てにいれた！"]
                     self.entities.remove(entity)
                     if entity.name == "カギ":
@@ -118,9 +119,10 @@ class Game:
                         else:
                             self.player.inventory["ポーション"] = 1
                             
+                    self.command = list(self.player.inventory.keys())
+                    self.selected_command = 0
                     self.print_map()
-                    self.print_status()
-                    self.print_states()
+                    self.print_stats_and_command()
                     self.wait_input()
                     
                     self.init_entity_map()
@@ -142,7 +144,6 @@ class Game:
             self.command = BATTLE_COMMAND
             self.selected_command = 0
             self.print_battle(enemy)
-            pygame.display.update()
 
             # プレイヤーのターン
             command_entered = False
@@ -160,7 +161,7 @@ class Game:
                                         del self.player.inventory[item_name]
                                     self.states = [f"{item_name}を つかった！"] + self.player.heal(3)
                                 else:
-                                    self.states = [f"このどうぐは つかえない！", "どうする？"]
+                                    self.states = [f"ここでは つかえない！", "どうする？"]
                             else:
                                 if self.selected_command == 0:
                                     self.states = []
@@ -190,7 +191,6 @@ class Game:
                             self.selected_command = min(len(self.command)-1, self.selected_command + 1)
                             
                         self.print_battle(enemy)
-                        pygame.display.update()
                             
             if self.states == ["うまくにげられた！"]:
                 break
@@ -199,7 +199,6 @@ class Game:
                 self.states = enemy.attack(self.player)
                 if self.player.health > 0:
                     self.print_battle(enemy)
-                    pygame.display.update()
                     self.wait_input()
                     self.states = ["どうする？"]
 
@@ -207,11 +206,9 @@ class Game:
             self.game_over = True
             self.states.extend([f"プレイヤーは しんでしまった！"])
             self.print_battle(enemy)
-            pygame.display.update()
             self.wait_input()
         elif enemy.health > 0:
             self.print_battle(enemy)
-            pygame.display.update()
             self.wait_input()
         else:
             self.entities.remove(enemy)
@@ -234,8 +231,6 @@ class Game:
             self.update_entity_map()
             
     def wait_input(self):
-        pygame.display.update()
-            
         command_entered = False
         while not command_entered:
             for event in pygame.event.get():
@@ -293,10 +288,7 @@ class Game:
             
         self.window.blit(image, cell_rect) # 画像をブリット
         
-        self.print_status()
-        self.print_command()    
-        self.print_states()
-
+        self.print_stats_and_command()
 
     def draw_text(self, text, x, y, font_size=28, color=BLACK_COLOR):
         font = pygame.font.Font("Nosutaru-dotMPlusH-10-Regular.ttf", font_size)
@@ -305,15 +297,18 @@ class Game:
         text_rect.topleft = (x, y)
         self.window.blit(text_surface, text_rect)
 
+    def print_stats_and_command(self):
+        self.print_status()
+        self.print_command()
+        self.print_states()
+        pygame.display.update()
+        
     def open_inventory(self):
         command_entered = False
         self.selected_command = 0
         self.states = [""]
         self.command = list(self.player.inventory.keys())
-        self.print_status()
-        self.print_command()
-        self.print_states()
-        pygame.display.update()
+        self.print_stats_and_command()
         
         while not command_entered:
             for event in pygame.event.get():
@@ -327,17 +322,14 @@ class Game:
                                 del self.player.inventory[item_name]
                             self.states = [f"{item_name}を つかった！"] + self.player.heal(3)
                         else:
-                            self.states = [f"このどうぐは つかえない！"]
+                            self.states = [f"ここでは つかえない！"]
                     elif event.key == K_m:
                         command_entered = True
                     elif event.key == K_w:
                         self.selected_command = max(0, self.selected_command - 1)
                     elif event.key == K_s:
                         self.selected_command = min(len(self.command)-1, self.selected_command + 1)
-                    self.print_status()
-                    self.print_command()
-                    self.print_states()
-                    pygame.display.update()
+                    self.print_stats_and_command()
                     if len(self.states) > 1:
                         self.wait_input()
 
