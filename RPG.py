@@ -221,51 +221,39 @@ class Game:
                     if event.key == K_n or event.key == K_m:
                         command_entered = True
         
+    def draw_bg_rect(self, pos=(0,0), size=(1,1), texts=None, text_bias=(12,10)):
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(pos[0], pos[1], size[0], size[1]))
+        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(pos[0], pos[1], size[0], size[1]), 4)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(pos[0], pos[1], size[0], size[1]), 2)
+        if texts:
+            for i, text in enumerate(texts):
+                self.draw_text(text, pos[0] + text_bias[0], pos[1] + text_bias[1] + i * 30, color=WHITE_COLOR)
 
     def print_status(self):
-        status_pos = (self.window_size[0] // 12, self.window_size[1] // 10)
-        status_size = (160, self.window_size[0] // 4)
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_pos[0], status_pos[1], status_size[0], status_size[1]))
-        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(status_pos[0], status_pos[1], status_size[0], status_size[1]), 4)
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_pos[0], status_pos[1], status_size[0], status_size[1]), 2)
         status_text = [
             f"LV {self.player.level:3d}",
             f"HP {self.player.health:3d}/{self.player.max_health:3d}",
             f"MP {self.player.mp:3d}/{self.player.max_mp:3d}",
             f"E  {self.player.experience:3d}/{self.player.experience_to_level_up:3d}"
         ]
-        for i, text in enumerate(status_text):
-            self.draw_text(text, status_pos[0] + 12, status_pos[1] + 10 + i * 30, color=WHITE_COLOR)
+        self.draw_bg_rect(pos=(self.window_size[0] // 12, self.window_size[1] // 10), size=(160, self.window_size[0] // 4), texts=status_text)
             
     def print_states(self):
-        state_pos = (self.window_size[0] // 6, self.window_size[1] // 5 * 3)
-        state_size = (self.window_size[0] // 3 * 2, self.window_size[1] // 3)
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(state_pos[0], state_pos[1], state_size[0], state_size[1]))
-        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(state_pos[0], state_pos[1], state_size[0], state_size[1]), 4)
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(state_pos[0], state_pos[1], state_size[0], state_size[1]), 2)
-        for i, text in enumerate(self.states):
-            self.draw_text(text, state_pos[0] + 12, state_pos[1] + 10 + i * 30, color=WHITE_COLOR)
+        self.draw_bg_rect(pos=(self.window_size[0] // 6, self.window_size[1] // 5 * 3),size=(self.window_size[0] // 3 * 2, self.window_size[1] // 3),texts=self.states)
             
     def print_command(self):
         command_pos = (self.window_size[0] // 3 * 2, self.window_size[1] // 10)
-        command_size = (self.window_size[0] // 4.5, self.window_size[1] // 4)
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]))
-        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 4)
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 2)
-        for i, text in enumerate(self.command):
-            self.draw_text(text, command_pos[0] + 30, command_pos[1] + 10 + i * 30, color=WHITE_COLOR)
+        self.draw_bg_rect(pos=command_pos,size=(self.window_size[0] // 4.5, self.window_size[1] // 4),texts=self.command,text_bias=(30,10))
         self.draw_text('>', command_pos[0] + 12, command_pos[1] + 10 + self.selected_command * 30, color=WHITE_COLOR)
         
     def print_battle(self, enemy):
         # icon
         icon_pos = (self.window_size[0] // 3, self.window_size[1] // 10)
         icon_size =(self.window_size[0] // 4, self.window_size[0] // 4)
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(icon_pos[0], icon_pos[1], icon_size[0], icon_size[1]))
-        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(icon_pos[0], icon_pos[1], icon_size[0], icon_size[1]), 4)
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(icon_pos[0], icon_pos[1], icon_size[0], icon_size[1]), 2)
+        self.draw_bg_rect(pos=icon_pos,size=icon_size)
+        
         cell_rect = pygame.Rect(icon_pos[0]+5, icon_pos[1]+5, icon_size[0], icon_size[1])
         image = pygame.transform.scale(IMAGES[enemy.name], (icon_size[0]-10, icon_size[1]-10)) # 画像リサイズ
-            
         self.window.blit(image, cell_rect) # 画像をブリット
         
         self.print_stats_and_command()
