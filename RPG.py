@@ -108,9 +108,8 @@ class Game:
             if target > 1:
                 entity = self.entities[target-2]
                 if entity.name == "heart":
-                    self.player.heal(3)
+                    self.states = self.player.heal(3)
                     self.entities.remove(entity)
-                    self.states = [f"HPが{3}かいふくした"]
                     
                     self.print_map()
                     self.print_status()
@@ -143,7 +142,7 @@ class Game:
 
     def battle(self, enemy):
         self.states = [f"{enemy.name}が あらわれた！", "どうする？"]
-        self.command = 0
+        self.selected_command = 0
         while self.player.health > 0 and enemy.health > 0:
             self.print_battle(enemy)
             pygame.display.update()
@@ -154,19 +153,19 @@ class Game:
                 for event in pygame.event.get():
                     if event.type == KEYDOWN:
                         if event.key == K_n:
-                            if self.command == 0:
+                            if self.selected_command == 0:
                                 self.states = []
                                 self.states.extend(self.player.attack(enemy))
                                 command_entered = True
-                            elif self.command == 2:
+                            elif self.selected_command == 2:
                                 self.states = ["にげられなかった！"]
                                 command_entered = True
                             else:
-                                self.states = [f"{BATTLE_COMMAND[self.command]}は まだつかえない！", "どうする？"]
+                                self.states = [f"{BATTLE_COMMAND[self.selected_command]}は まだつかえない！", "どうする？"]
                         elif event.key == K_w:
-                            self.command = max(0, self.command - 1)
+                            self.selected_command = max(0, self.selected_command - 1)
                         elif event.key == K_s:
-                            self.command = min(3, self.command + 1)
+                            self.selected_command = min(3, self.selected_command + 1)
                             
                         self.print_battle(enemy)
                         pygame.display.update()
@@ -267,7 +266,7 @@ class Game:
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 2)
         for i, text in enumerate(BATTLE_COMMAND):
             self.draw_text(text, command_pos[0] + 30, command_pos[1] + 10 + i * 30, color=WHITE_COLOR)
-        self.draw_text('>', command_pos[0] + 12, command_pos[1] + 10 + self.command * 30, color=WHITE_COLOR)
+        self.draw_text('>', command_pos[0] + 12, command_pos[1] + 10 + self.selected_command * 30, color=WHITE_COLOR)
             
         self.print_states()
 

@@ -12,8 +12,5 @@ class Enemy(Entity):
         super().__init__(x, y, name, health, attack_power, exp)
 
     def attack(self, player):
-        player.take_damage(self.attack_power)
+        player.health = max(0,player.health-self.attack_power)
         return [f"{self.name}の こうげき", f"{self.attack_power}ダメージをうけた！"]
-
-    def take_damage(self, damage):
-        self.health -= damage

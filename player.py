@@ -16,11 +16,10 @@ class Player:
         enemy.health -= self.attack_power
         return ["プレイヤーの こうげき！", f"{enemy.name}に{self.attack_power}ダメージ"]
 
-    def take_damage(self, damage):
-        self.health = max(0,self.health-damage)
-
     def heal(self, value:int=3):
-        self.health = min(self.max_health, self.health + value)
+        value = min(self.max_health - self.health, value)
+        self.health += value
+        return [f"HPが{value}かいふくした"]
         
     def gain_experience(self, experience):
         self.experience += experience
@@ -28,7 +27,7 @@ class Player:
         return states
 
     def level_up(self):
-        status = [f"レベルアップ！", "ステータスが上昇！"]
+        status = [f"レベルUP！", "ステータスUP！"]
         self.level += 1
         status.append(f"HP ({self.max_health} -> {self.max_health+2})")
         self.max_health += 2
