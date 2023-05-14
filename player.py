@@ -1,5 +1,5 @@
 class Player:
-    def __init__(self, x, y, game_map):
+    def __init__(self, x, y):
         self.x = x
         self.y = y
         self.health = 5
@@ -9,8 +9,6 @@ class Player:
         self.level = 1
         self.experience = 0
         self.experience_to_level_up = 20
-        self.game_map = game_map
-        self.game_map[self.y][self.x] = 1
 
     def attack(self, enemy):
         enemy.health -= self.attack_power

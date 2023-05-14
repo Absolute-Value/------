@@ -6,15 +6,14 @@ from player import Player
 from define import *
 
 class Game:
-    def __init__(self, cell_size=60,): # 12x10のマップを作成
+    def __init__(self, cell_size=60,):
         self.stage = INIT_STAGE
         self.map = MAP[self.stage]
         self.map_size = (len(self.map[0]), len(self.map))
-        self.entity_map = self.generate_map()
-        self.player = Player(5, 5, self.entity_map)
-        self.enemies_positions = self.generate_enemies_positions()
-        self.boss_position = random.choice(self.enemies_positions)
-        self.enemies = self.generate_enemies()
+        self.player = Player(5, 5)
+        self.init_entity_map()
+        self.entities = self.generate_enemies()
+        print(self.entity_map)
         self.game_over = False
         
         self.cell_size = cell_size
@@ -24,8 +23,6 @@ class Game:
         self.window = pygame.display.set_mode((self.window_size[0], self.window_size[1]))
         pygame.display.set_caption('RPG Game')
 
-        self.entity_map[self.boss_position[1]][self.boss_position[0]] = 3  # ボスの位置をマップに反映
-
         # 使用する画像を読み込んでおく
         self.land_image = pygame.transform.scale(pygame.image.load("images/land.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
         self.tree_image = pygame.transform.scale(pygame.image.load("images/tree.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
@@ -34,30 +31,27 @@ class Game:
         self.enemy_image = pygame.transform.scale(pygame.image.load("images/enemy.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
         self.boss_image = pygame.transform.scale(pygame.image.load("images/boss.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
         
+    def init_entity_map(self):
+        self.entity_map = [[0 for _ in range(self.map_size[0])] for _ in range(self.map_size[1])]
+        self.entity_map[self.player.y][self.player.x] = 1
+        
+    def update_entity_map(self):
+        for i, entity in enumerate(self.entities):
+            self.entity_map[entity.y][entity.x] = i + 2
+        
     def get_random_empty_position(self):
         while True:
             x = random.randint(0, self.map_size[0] - 1)
             y = random.randint(0, self.map_size[1] - 1)
             if self.entity_map[y][x] == 0 and self.map[y][x] == 0:
-                self.entity_map[y][x] = 2
                 return x, y
-
-    def generate_enemies_positions(self):
-        positions = []
-        for _ in range(ENEMY_NUM):  # 敵の位置を生成
-            x, y = self.get_random_empty_position()
-            positions.append((x, y))
-        return positions
-
-    def generate_map(self):
-        map = [[0 for _ in range(self.map_size[0])] for _ in range(self.map_size[1])]
-        return map
-
+            
     def generate_enemies(self):
         enemies = []
-        for position in self.enemies_positions:
-            x, y = position
-            if position == self.boss_position:
+        for i in range(ENEMY_NUM):
+            x, y = self.get_random_empty_position()
+            self.entity_map[y][x] = i + 2
+            if i == 0 and self.stage == (1,1):
                 enemy = Boss(x, y, 5, 3)  # BossのHP: 5, 攻撃力: 5
             else:
                 enemy = Enemy(x, y, 2, 1)  # 通常の敵のHP: 2, 攻撃力: 1
@@ -78,9 +72,9 @@ class Game:
         cell_rect = pygame.Rect(self.player.x * self.cell_size, self.player.y * self.cell_size, self.cell_size, self.cell_size)
         self.window.blit(self.player_image, cell_rect) # プレイヤー画像をブリット
         
-        for enemy in self.enemies:
-            cell_rect = pygame.Rect(enemy.x * self.cell_size, enemy.y * self.cell_size, self.cell_size, self.cell_size)
-            if enemy.name == "BoneKing":
+        for entity in self.entities:
+            cell_rect = pygame.Rect(entity.x * self.cell_size, entity.y * self.cell_size, self.cell_size, self.cell_size)
+            if entity.name == "BoneKing":
                 self.window.blit(self.boss_image, cell_rect) # 画像をブリット
             else:
                 self.window.blit(self.enemy_image, cell_rect) # 画像をブリット
@@ -89,27 +83,24 @@ class Game:
         new_x = self.player.x + dx
         new_y = self.player.y + dy
 
-        if (new_x < 0 and self.stage[1] > 1):
+        if (new_x < 0 and self.stage[1] > 1): # 左ステージへの移動
             self.stage = (self.stage[0], self.stage[1]-1)
             self.map = MAP[self.stage]
             self.player.x = self.map_size[0] - 1
-            self.entity_map[self.player.y][self.player.x] = 1
-            self.enemies_positions = self.generate_enemies_positions()
-            self.boss_position = random.choice(self.enemies_positions)
-            self.enemies = self.generate_enemies()
-        elif (new_x == self.map_size[0] and self.stage[1] < 2):
+            self.init_entity_map()
+            self.entities = self.generate_enemies()
+        elif (new_x == self.map_size[0] and self.stage[1] < 2): # 右ステージへの移動
             self.stage = (self.stage[0], self.stage[1]+1)
             self.map = MAP[self.stage]
             self.player.x = 0
-            self.entity_map[self.player.y][self.player.x] = 1
-            self.enemies_positions = self.generate_enemies_positions()
-            self.boss_position = random.choice(self.enemies_positions)
-            self.enemies = self.generate_enemies()
+            self.update_entity_map()
+            self.entities = self.generate_enemies()
         elif (new_x >= 0 and new_x < self.map_size[0] and new_y >= 0 and new_y < self.map_size[1] and (self.map[new_y][new_x] == 0)):
             if self.entity_map[new_y][new_x] > 1:
-                # 敵がいる場合、バトルを開始する
-                self.encounter_enemy(new_x, new_y)
+                # 移動先に敵がいる場合、バトルを開始する
+                self.battle(self.entities[self.entity_map[new_y][new_x]-2])
             else:
+                self.entity_map[self.player.y][self.player.x] = 0
                 self.player.x = new_x
                 self.player.y = new_y
                 self.entity_map[self.player.y][self.player.x] = 1
@@ -117,14 +108,7 @@ class Game:
         else:
             print("You can't move there . Try again .")
 
-
-    def encounter_enemy(self, x, y):
-        for enemy in self.enemies:
-            if enemy.x == x and enemy.y == y:
-                self.battle(enemy)
-
     def battle(self, enemy):
-        self.current_enemy = enemy
         self.states = [f"{enemy.name} showed up !"]
         while self.player.health > 0 and enemy.health > 0:
             self.print_map()
@@ -155,8 +139,9 @@ class Game:
             self.game_over = True
         else:
             self.player.gain_experience(10)
-            self.enemies.remove(enemy)
-            self.entity_map[enemy.y][enemy.x] = 0  # マップ上から敵を削除
+            self.entities.remove(enemy)
+            self.init_entity_map()
+            self.update_entity_map()
             self.states.append(f"Player killed {enemy.name} .")
 
     def print_battle(self, enemy):
