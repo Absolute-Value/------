@@ -20,11 +20,12 @@ python RPG.py
 
 ```
 
-## 背景などの画像
-![](images/bg.png)
+## 使用素材
 
-- コチラのサイトから使用させていただきました。
+- 背景などの画像
     - [DOT ILLUST](https://dot-illust.net/)
+- フォント
+    - [「ノスタルドット（M+）」フォント](https://logotype.jp/nosutaru-dot.html)
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [Python.js]: https://img.shields.io/badge/Python-3572A5?style=for-the-badge&logo=Python&logoColor=white

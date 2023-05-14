@@ -2,33 +2,33 @@ class Player:
     def __init__(self, x:int=5, y:int=5):
         self.x = x
         self.y = y
-        self.health = 5
         self.max_health = 5
+        self.health = self.max_health
         self.attack_power = 1
         self.defense = False
         self.level = 1
         self.experience = 0
-        self.experience_to_level_up = 20
+        self.experience_to_level_up = 3
 
     def attack(self, enemy):
         enemy.health -= self.attack_power
-        return f"Player did {self.attack_power} damage to {enemy.name} ."
+        return f"{enemy.name}に{self.attack_power}ダメージあたえた"
 
     def take_damage(self, damage):
         self.health = max(0,self.health-damage)
 
-    def heal(self, value=0.3):
-        self.health = min(self.max_health, self.health + int(self.max_health*value))
+    def heal(self, value:int=3):
+        self.health = min(self.max_health, self.health + value)
         
     def gain_experience(self, experience):
         self.experience += experience
-        states = [f"Player got {experience} exp ."]
+        states = [f"{experience}けいけんち をてにいれた"]
         if self.experience >= self.experience_to_level_up:
             states.extend(self.level_up())
         return states
 
     def level_up(self):
-        status = [f"Player leveled up !"]
+        status = [f"レベルアップ！"]
         self.level += 1
         status.append(f"HP ({self.max_health} -> {self.max_health+2})")
         self.max_health += 2

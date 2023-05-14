@@ -51,9 +51,9 @@ class Game:
             x, y = self.get_random_empty_position()
             self.entity_map[y][x] = i + 2
             if i == 0 and self.stage == (1,1):
-                enemy = Enemy(x, y, "BoneKing", 5, 3, 30)  # BossのHP: 5, 攻撃力: 5
+                enemy = Enemy(x, y, "BoneKing", 5, 3, 5) # BossのHP: 5, 攻撃力: 5
             else:
-                enemy = Enemy(x, y, "Bone", 2, 1)  # 通常の敵のHP: 2, 攻撃力: 1
+                enemy = Enemy(x, y, "Bone") # 通常の敵のHP: 2, 攻撃力: 1
             self.entities.append(enemy)
 
     def print_map(self):
@@ -100,9 +100,9 @@ class Game:
             if target > 1:
                 entity = self.entities[target-2]
                 if entity.name == "heart":
-                    self.player.heal()
+                    self.player.heal(3)
                     self.entities.remove(entity)
-                    self.states = ["Player healed ."]
+                    self.states = [f"HPが{3}かいふくした"]
                     
                     self.print_map()
                     self.print_status()
@@ -115,19 +115,17 @@ class Game:
                     self.battle(entity)
             else:
                 self.entity_map[self.player.y][self.player.x] = 0
-                self.player.x = new_x
-                self.player.y = new_y
+                self.player.x, self.player.y = new_x, new_y
                 self.entity_map[self.player.y][self.player.x] = 1
             
         else:
             print("You can't move there . Try again .")
 
     def battle(self, enemy):
-        self.states = [f"{enemy.name} showed up !"]
+        self.states = [f"{enemy.name}が あらわれた！"]
         while self.player.health > 0 and enemy.health > 0:
             self.print_map()
             self.print_battle(enemy)
-
             pygame.display.update()
 
             # プレイヤーのターン
@@ -150,7 +148,7 @@ class Game:
 
         if self.player.health == 0:
             self.game_over = True
-            self.states.extend([f"Player was killed by {enemy.name}", "Game Over"])
+            self.states.extend([f"プレイヤーは しんでしまった！"])
             
             self.print_map()
             self.print_battle(enemy)
@@ -158,11 +156,11 @@ class Game:
                             
         else:
             self.entities.remove(enemy)
-            self.states.append(f"Player killed {enemy.name}")
+            self.states.append(f"{enemy.name}を たおした！")
             self.states.extend(self.player.gain_experience(enemy.exp))
             if random.random() < 0.2:
                 self.entities.append(Entity(enemy.x, enemy.y, "heart"))
-                self.states.append(f"{enemy.name} droped heart .")
+                self.states.append(f"{enemy.name}は かいふくを おとした")
 
             self.print_map()
             self.print_battle(enemy)
@@ -183,18 +181,19 @@ class Game:
         
 
     def print_status(self):
-        status_pos = (self.window_size[0] // 10, self.window_size[1] // 10)
-        status_size = (self.window_size[0] // 5, self.window_size[0] // 4)
+        status_pos = (self.window_size[0] // 12, self.window_size[1] // 10)
+        status_size = (160, self.window_size[0] // 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_pos[0], status_pos[1], status_size[0], status_size[1]))
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(status_pos[0], status_pos[1], status_size[0], status_size[1]), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(status_pos[0], status_pos[1], status_size[0], status_size[1]), 2)
         status_text = [
-            f"Lv.: {self.player.level}",
-            f"HP : {self.player.health}/{self.player.max_health}",
-            f"Exp: {self.player.experience}/{self.player.experience_to_level_up}"
+            f"LV {self.player.level:3d}",
+            f"HP {self.player.health:3d}/{self.player.max_health:3d}",
+            f"MP {self.player.health:3d}/{self.player.max_health:3d}",
+            f"E  {self.player.experience:3d}/{self.player.experience_to_level_up:3d}"
         ]
         for i, text in enumerate(status_text):
-            self.draw_text(text, status_pos[0] + 10, status_pos[1] + 10 + i * 24, color=WHITE_COLOR)
+            self.draw_text(text, status_pos[0] + 12, status_pos[1] + 10 + i * 30, color=WHITE_COLOR)
             
     def print_states(self):
         state_pos = (self.window_size[0] // 6, self.window_size[1] // 5 * 3)
@@ -203,12 +202,12 @@ class Game:
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(state_pos[0], state_pos[1], state_size[0], state_size[1]), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(state_pos[0], state_pos[1], state_size[0], state_size[1]), 2)
         for i, text in enumerate(self.states):
-            self.draw_text(text, state_pos[0] + 15, state_pos[1] + 15 + i * 24, color=WHITE_COLOR)
+            self.draw_text(text, state_pos[0] + 12, state_pos[1] + 10 + i * 30, color=WHITE_COLOR)
         
     def print_battle(self, enemy):
         # icon
+        icon_pos = (self.window_size[0] // 3, self.window_size[1] // 10)
         icon_size =(self.window_size[0] // 4, self.window_size[0] // 4)
-        icon_pos = (self.window_size[0] // 2 - icon_size[0] // 2, self.window_size[1] // 2 - icon_size[1] // 1.5)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(icon_pos[0], icon_pos[1], icon_size[0], icon_size[1]))
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(icon_pos[0], icon_pos[1], icon_size[0], icon_size[1]), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(icon_pos[0], icon_pos[1], icon_size[0], icon_size[1]), 2)
@@ -223,23 +222,25 @@ class Game:
         self.print_status()
 
         # command
-        command_pos = (self.window_size[0] // 5 * 2, self.window_size[1] // 12)
-        command_size = (self.window_size[0] // 2, self.window_size[1] // 8)
+        command_pos = (self.window_size[0] // 3 * 2, self.window_size[1] // 10)
+        command_size = (self.window_size[0] // 4, self.window_size[1] // 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]))
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 2)
         status_text = [
-            f"n Attack",
-            f"m Defence"
+            "> こうげき",
+            "  じゅもん",
+            "  にげる",
+            "  どうぐ"
         ]
         for i, text in enumerate(status_text):
-            self.draw_text(text, command_pos[0] + 15, command_pos[1] + 15 + i * 24, color=WHITE_COLOR)
+            self.draw_text(text, command_pos[0] + 12, command_pos[1] + 10 + i * 30, color=WHITE_COLOR)
             
         self.print_states()
 
 
-    def draw_text(self, text, x, y, font_size=36, color=BLACK_COLOR):
-        font = pygame.font.Font(None, font_size)
+    def draw_text(self, text, x, y, font_size=28, color=BLACK_COLOR):
+        font = pygame.font.Font("Nosutaru-dotMPlusH-10-Regular.ttf", font_size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
         text_rect.topleft = (x, y)
