@@ -6,30 +6,29 @@ from player import Player
 from define import *
 
 class Game:
-    def __init__(self, cell_size=60,):
+    def __init__(self):
         self.stage = INIT_STAGE
         self.map = MAP[self.stage]
         self.map_size = (len(self.map[0]), len(self.map))
-        self.player = Player(5, 5)
+        self.player = Player()
         self.init_entity_map()
         self.generate_enemies()
         self.game_over = False
         
-        self.cell_size = cell_size
-        self.window_size = [m * cell_size for m in self.map_size]
+        self.window_size = [m * CELL_SIZE for m in self.map_size]
         pygame.init()
         # ゲームウィンドウの作成
         self.window = pygame.display.set_mode((self.window_size[0], self.window_size[1]))
         pygame.display.set_caption('RPG Game')
 
         # 使用する画像を読み込んでおく
-        self.heart_image = pygame.transform.scale(pygame.image.load("images/heart.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
-        self.land_image = pygame.transform.scale(pygame.image.load("images/land.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
-        self.tree_image = pygame.transform.scale(pygame.image.load("images/tree.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
-        self.sea_image = pygame.transform.scale(pygame.image.load("images/sea.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
-        self.player_image = pygame.transform.scale(pygame.image.load("images/player.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
-        self.enemy_image = pygame.transform.scale(pygame.image.load("images/enemy.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
-        self.boss_image = pygame.transform.scale(pygame.image.load("images/boss.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
+        self.heart_image = pygame.transform.scale(pygame.image.load("images/heart.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.land_image = pygame.transform.scale(pygame.image.load("images/land.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.tree_image = pygame.transform.scale(pygame.image.load("images/tree.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.sea_image = pygame.transform.scale(pygame.image.load("images/sea.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.player_image = pygame.transform.scale(pygame.image.load("images/player.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.enemy_image = pygame.transform.scale(pygame.image.load("images/enemy.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.boss_image = pygame.transform.scale(pygame.image.load("images/boss.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
         
     def init_entity_map(self):
         self.entity_map = [[0 for _ in range(self.map_size[0])] for _ in range(self.map_size[1])]
@@ -60,19 +59,19 @@ class Game:
     def print_map(self):
         for y, map_row in enumerate(self.map):
             for x, map_tile in enumerate(map_row):
-                cell_rect = pygame.Rect(x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
-                if map_tile == 4:
+                cell_rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+                if map_tile == 4: # 海だったら
                     self.window.blit(self.sea_image, cell_rect) # 画像をブリット
                 else:
                     self.window.blit(self.land_image, cell_rect) # 画像をブリット
-                    if map_tile == 1:
+                    if map_tile == 1: # 木だったら
                         self.window.blit(self.tree_image, cell_rect) # 画像をブリット
         
-        cell_rect = pygame.Rect(self.player.x * self.cell_size, self.player.y * self.cell_size, self.cell_size, self.cell_size)
+        cell_rect = pygame.Rect(self.player.x * CELL_SIZE, self.player.y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
         self.window.blit(self.player_image, cell_rect) # プレイヤー画像をブリット
         
         for entity in self.entities:
-            cell_rect = pygame.Rect(entity.x * self.cell_size, entity.y * self.cell_size, self.cell_size, self.cell_size)
+            cell_rect = pygame.Rect(entity.x * CELL_SIZE, entity.y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
             if entity.name == "heart":
                 self.window.blit(self.heart_image, cell_rect) # 画像をブリット
             elif entity.name == "BoneKing":

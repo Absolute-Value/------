@@ -1,5 +1,5 @@
 class Player:
-    def __init__(self, x, y):
+    def __init__(self, x:int=5, y:int=5):
         self.x = x
         self.y = y
         self.health = 5
