@@ -23,6 +23,7 @@ class Game:
         pygame.display.set_caption('RPG Game')
 
         # 使用する画像を読み込んでおく
+        self.heart_image = pygame.transform.scale(pygame.image.load("images/heart.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
         self.land_image = pygame.transform.scale(pygame.image.load("images/land.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
         self.tree_image = pygame.transform.scale(pygame.image.load("images/tree.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
         self.sea_image = pygame.transform.scale(pygame.image.load("images/sea.png"), (cell_size, cell_size)) # 画像を読み込みリサイズ
