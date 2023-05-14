@@ -1,7 +1,7 @@
 import random
 import pygame
 from pygame.locals import *
-from enemies import *
+from entities import *
 from player import Player
 from define import *
 
@@ -12,8 +12,7 @@ class Game:
         self.map_size = (len(self.map[0]), len(self.map))
         self.player = Player(5, 5)
         self.init_entity_map()
-        self.entities = self.generate_enemies()
-        print(self.entity_map)
+        self.generate_enemies()
         self.game_over = False
         
         self.cell_size = cell_size
@@ -47,16 +46,15 @@ class Game:
                 return x, y
             
     def generate_enemies(self):
-        enemies = []
+        self.entities = []
         for i in range(ENEMY_NUM):
             x, y = self.get_random_empty_position()
             self.entity_map[y][x] = i + 2
             if i == 0 and self.stage == (1,1):
-                enemy = Boss(x, y, 5, 3)  # BossのHP: 5, 攻撃力: 5
+                enemy = Enemy(x, y, "BoneKing", 5, 3)  # BossのHP: 5, 攻撃力: 5
             else:
-                enemy = Enemy(x, y, 2, 1)  # 通常の敵のHP: 2, 攻撃力: 1
-            enemies.append(enemy)
-        return enemies
+                enemy = Enemy(x, y, "Bone", 2, 1)  # 通常の敵のHP: 2, 攻撃力: 1
+            self.entities.append(enemy)
 
     def print_map(self):
         for y, map_row in enumerate(self.map):
@@ -88,13 +86,13 @@ class Game:
             self.map = MAP[self.stage]
             self.player.x = self.map_size[0] - 1
             self.init_entity_map()
-            self.entities = self.generate_enemies()
+            self.generate_enemies()
         elif (new_x == self.map_size[0] and self.stage[1] < 2): # 右ステージへの移動
             self.stage = (self.stage[0], self.stage[1]+1)
             self.map = MAP[self.stage]
             self.player.x = 0
             self.init_entity_map()
-            self.entities = self.generate_enemies()
+            self.generate_enemies()
         elif (new_x >= 0 and new_x < self.map_size[0] and new_y >= 0 and new_y < self.map_size[1] and (self.map[new_y][new_x] == 0)):
             if self.entity_map[new_y][new_x] > 1:
                 # 移動先に敵がいる場合、バトルを開始する

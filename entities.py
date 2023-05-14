@@ -1,10 +1,14 @@
-class Enemy:
-    def __init__(self, x, y, health=2, attack_power=1):
+class Entity:
+    def __init__(self, x, y, name="None", health=1, attack_power=1):
         self.x = x
         self.y = y
         self.health = health
+        self.name = name
         self.attack_power = attack_power
-        self.name = "Bone"
+        
+class Enemy(Entity):
+    def __init__(self, x, y, name="Bone", health=2, attack_power=1):
+        super().__init__(x, y, name, health)
 
     def attack(self, player):
         if player.defense:
@@ -15,8 +19,3 @@ class Enemy:
 
     def take_damage(self, damage):
         self.health -= damage
-
-class Boss(Enemy):
-    def __init__(self, x, y, health=5, attack_power=3):
-        super().__init__(x, y, health, attack_power)
-        self.name = "BoneKing"
