@@ -7,7 +7,7 @@ from define import *
 
 class Game:
     def __init__(self, cell_size=60,): # 12x10のマップを作成
-        self.map = MAP
+        self.map = MAP["1-2"]
         self.map_size = (len(self.map[0]), len(self.map))
         self.entity_map = self.generate_map()
         self.player = Player(5, 5, self.entity_map)
@@ -67,7 +67,7 @@ class Game:
         for y, map_row in enumerate(self.map):
             for x, map_tile in enumerate(map_row):
                 cell_rect = pygame.Rect(x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size)
-                if map_tile == 8:
+                if map_tile == 4:
                     self.window.blit(self.sea_image, cell_rect) # 画像をブリット
                 else:
                     self.window.blit(self.land_image, cell_rect) # 画像をブリット
