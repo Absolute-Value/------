@@ -1,17 +1,17 @@
 from define import INIT_EXP, EXP_RATE
 class Player:
     def __init__(self, x:int=5, y:int=5):
-        self.x = x
-        self.y = y
-        self.max_health = 5
-        self.health = self.max_health
-        self.mp = 5
-        self.max_mp = 5
-        self.attack_power = 1
-        self.level = 1
-        self.experience = 0
-        self.experience_to_level_up = INIT_EXP
-        self.inventory = {"やくそう":1}
+        self.x:int = x
+        self.y:int = y
+        self.max_health:int = 5
+        self.health:int = self.max_health
+        self.mp:int = 5
+        self.max_mp:int = 5
+        self.attack_power:int = 1
+        self.level:int = 1
+        self.experience:int = 0
+        self.experience_to_level_up:int = INIT_EXP
+        self.inventory:dict = {"やくそう":1}
 
     def attack(self, enemy):
         enemy.health -= self.attack_power

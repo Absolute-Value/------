@@ -11,10 +11,10 @@ class Game:
         self.stage = INIT_STAGE
         self.map = MAP[self.stage]
         self.map_size = (len(self.map[0]), len(self.map))
+        self.game_over:bool = False
         self.player = Player()
         self.init_entity_map()
         self.generate_entities()
-        self.game_over = False
         
         self.window_size = [m * CELL_SIZE for m in self.map_size]
         pygame.init()

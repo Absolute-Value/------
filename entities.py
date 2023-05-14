@@ -2,12 +2,12 @@ import random
 
 class Entity:
     def __init__(self, x:int, y:int, name:str="None", health:int=1, attack_power:int=1, exp:int=0):
-        self.x = x
-        self.y = y
-        self.health = health
-        self.name = name
-        self.attack_power = attack_power
-        self.exp = exp
+        self.x:int = x
+        self.y:int = y
+        self.health:int = health
+        self.name:str = name
+        self.attack_power:int = attack_power
+        self.exp:int = exp
         
 class Enemy(Entity):
     def __init__(self, x:int, y:int, name:str="Bone", health:int=3, attack_power:int=1, exp:int=1, escape_rate:float=0.9, drop_items:dict={"やくそう":0.2}):
