@@ -181,14 +181,18 @@ class Game:
                                     else:
                                         self.command = list(self.player.inventory.keys())
                                         self.selected_command = 0
+                                        self.states = [f"{self.player.inventory[self.command[self.selected_command]]}こ"]
                                         open_inventory = True
                         elif event.key == K_m:
                             self.command = BATTLE_COMMAND
+                            self.states = ["どうする？"]
                             open_inventory = False
                         elif event.key == K_w:
                             self.selected_command = max(0, self.selected_command - 1)
+                            if open_inventory : self.states = [f"{self.player.inventory[self.command[self.selected_command]]}こ"]
                         elif event.key == K_s:
                             self.selected_command = min(len(self.command)-1, self.selected_command + 1)
+                            if open_inventory : self.states = [f"{self.player.inventory[self.command[self.selected_command]]}こ"]
                             
                         self.print_battle(enemy)
                             
@@ -305,9 +309,9 @@ class Game:
         
     def open_inventory(self):
         command_entered = False
-        self.selected_command = 0
-        self.states = [""]
         self.command = list(self.player.inventory.keys())
+        self.selected_command = 0
+        self.states = [f"{self.player.inventory[self.command[self.selected_command]]}こ"]
         self.print_stats_and_command()
         
         while not command_entered:
@@ -327,8 +331,10 @@ class Game:
                         command_entered = True
                     elif event.key == K_w:
                         self.selected_command = max(0, self.selected_command - 1)
+                        self.states = [f"{self.player.inventory[self.command[self.selected_command]]}こ"]
                     elif event.key == K_s:
                         self.selected_command = min(len(self.command)-1, self.selected_command + 1)
+                        self.states = [f"{self.player.inventory[self.command[self.selected_command]]}こ"]
                     self.print_stats_and_command()
                     if len(self.states) > 1:
                         self.wait_input()
@@ -350,7 +356,7 @@ class Game:
                     self.player_move(-1, 0)
                 if event.key == K_d:
                     self.player_move(1, 0)
-                if event.key == K_i:
+                if event.key == K_i and len(self.player.inventory) > 0:
                     self.open_inventory()
                     
     def run_game(self):
