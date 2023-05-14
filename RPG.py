@@ -22,7 +22,7 @@ class Game:
         pygame.display.set_caption('RPG Game')
 
         # 使用する画像を読み込んでおく
-        self.heart_image = pygame.transform.scale(pygame.image.load("images/heart.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
+        self.potion_image = pygame.transform.scale(pygame.image.load("images/potion.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
         self.land_image = pygame.transform.scale(pygame.image.load("images/land.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
         self.tree_image = pygame.transform.scale(pygame.image.load("images/tree.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
         self.sea_image = pygame.transform.scale(pygame.image.load("images/sea.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
@@ -54,7 +54,7 @@ class Game:
             self.entity_map[5][10] = bias
             bias += 1
         if self.stage == (1,3):
-            self.entities.append(Entity(5, 3, "Key"))
+            self.entities.append(Entity(5, 3, "鍵"))
             self.entity_map[3][5] = bias
             bias += 1
         for i in range(ENEMY_NUM):
@@ -78,9 +78,9 @@ class Game:
         
         for entity in self.entities:
             cell_rect = pygame.Rect(entity.x * CELL_SIZE, entity.y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-            if entity.name == "heart":
-                self.window.blit(self.heart_image, cell_rect) # 画像をブリット
-            elif entity.name == "Key":
+            if entity.name == "ポーション":
+                self.window.blit(self.potion_image, cell_rect) # 画像をブリット
+            elif entity.name == "鍵":
                 self.window.blit(self.key_image, cell_rect) # 画像をブリット
             elif entity.name == "BoneKing":
                 self.window.blit(self.boss_image, cell_rect) # 画像をブリット
@@ -107,21 +107,13 @@ class Game:
             target = self.entity_map[new_y][new_x]
             if target > 1:
                 entity = self.entities[target-2]
-                if entity.name == "heart":
-                    self.states = self.player.heal(3)
+                if entity.name in ["ポーション", "鍵"]:
+                    self.states = [f"{entity.name}を てにいれた！"]
                     self.entities.remove(entity)
-                    
-                    self.print_map()
-                    self.print_status()
-                    self.print_states()
-                    self.wait_input()
-                    
-                    self.init_entity_map()
-                    self.update_entity_map()
-                elif entity.name == "Key":
-                    self.entities.remove(entity)
-                    self.states = [f"鍵を手に入れた！"]
-                    
+                    if entity.name == "鍵":
+                        self.player.inventory["鍵"] = 1
+                    else:
+                        self.player.inventory["ポーション"] += 1
                     self.print_map()
                     self.print_status()
                     self.print_states()
@@ -142,35 +134,56 @@ class Game:
 
     def battle(self, enemy):
         self.states = [f"{enemy.name}が あらわれた！", "どうする？"]
-        self.selected_command = 0
         while self.player.health > 0 and enemy.health > 0:
+            self.command = BATTLE_COMMAND
+            self.selected_command = 0
             self.print_battle(enemy)
             pygame.display.update()
 
             # プレイヤーのターン
             command_entered = False
+            open_inventory = False
             while not command_entered:
                 for event in pygame.event.get():
                     if event.type == KEYDOWN:
                         if event.key == K_n:
-                            if self.selected_command == 0:
-                                self.states = []
-                                self.states.extend(self.player.attack(enemy))
-                                command_entered = True
-                            elif self.selected_command == 1:
-                                self.states = [f"じゅもんを おぼえていない！", "どうする？"]
-                            elif self.selected_command == 2:
-                                command_entered = True
-                                if random.random() < enemy.escape_rate:
-                                    self.states = ["うまくにげられた！"]
+                            if open_inventory:
+                                item_name = self.command[self.selected_command]
+                                if item_name == "ポーション":
+                                    command_entered = True
+                                    self.player.inventory[item_name] -= 1
+                                    if self.player.inventory[item_name] == 0:
+                                        del self.player.inventory[item_name]
+                                    self.states = [f"{item_name} つかった！"] + self.player.heal(3)
                                 else:
-                                    self.states = ["にげられなかった！"]
+                                    self.states = [f"このどうぐは つかえない！", "どうする？"]
                             else:
-                                self.states = [f"どうぐを もっていない！", "どうする？"]
+                                if self.selected_command == 0:
+                                    self.states = []
+                                    self.states.extend(self.player.attack(enemy))
+                                    command_entered = True
+                                elif self.selected_command == 1:
+                                    self.states = [f"じゅもんを おぼえていない！", "どうする？"]
+                                elif self.selected_command == 2:
+                                    command_entered = True
+                                    if random.random() < enemy.escape_rate:
+                                        self.states = ["うまくにげられた！"]
+                                    else:
+                                        self.states = ["にげられなかった！"]
+                                else:
+                                    if len(self.player.inventory) == 0:
+                                        self.states = [f"どうぐを もっていない！", "どうする？"]
+                                    else:
+                                        self.command = list(self.player.inventory.keys())
+                                        self.selected_command = 0
+                                        open_inventory = True
+                        elif event.key == K_m:
+                            self.command = BATTLE_COMMAND
+                            open_inventory = False
                         elif event.key == K_w:
                             self.selected_command = max(0, self.selected_command - 1)
                         elif event.key == K_s:
-                            self.selected_command = min(3, self.selected_command + 1)
+                            self.selected_command = min(len(self.command)-1, self.selected_command + 1)
                             
                         self.print_battle(enemy)
                         pygame.display.update()
@@ -206,8 +219,8 @@ class Game:
                 self.wait_input()
                 self.states = self.player.level_up()
             if random.random() < 0.2:
-                self.entities.append(Entity(enemy.x, enemy.y, "heart"))
-                self.states.append(f"{enemy.name}は かいふくを おとした")
+                self.entities.append(Entity(enemy.x, enemy.y, "ポーション"))
+                self.states.append(f"{enemy.name}は ポーションを おとした")
 
             self.print_map()
             self.print_battle(enemy)
@@ -274,7 +287,7 @@ class Game:
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]))
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 2)
-        for i, text in enumerate(BATTLE_COMMAND):
+        for i, text in enumerate(self.command):
             self.draw_text(text, command_pos[0] + 30, command_pos[1] + 10 + i * 30, color=WHITE_COLOR)
         self.draw_text('>', command_pos[0] + 12, command_pos[1] + 10 + self.selected_command * 30, color=WHITE_COLOR)
             
