@@ -28,9 +28,16 @@ class Player:
         return states
 
     def level_up(self):
+        status = [f"Player leveled up !"]
         self.level += 1
-        self.max_health += 5
+        status.append(f"HP ({self.max_health} -> {self.max_health+2})")
+        self.max_health += 2
         self.health = self.max_health
+        if self.level % 2 == 0:
+            status.append(f"AT ({self.max_health} -> {self.max_health+1})")
+            self.attack_power += 1
+        
         self.experience -= self.experience_to_level_up
-        self.experience_to_level_up *= 2
-        return [f"Player leveled up ! ({self.level-1}->{self.level})", "HP increased and fully healed ."]
+        self.experience_to_level_up += int(1.5*self.experience_to_level_up)
+        
+        return status
