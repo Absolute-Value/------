@@ -158,7 +158,7 @@ class Game:
                                     self.player.inventory[item_name] -= 1
                                     if self.player.inventory[item_name] == 0:
                                         del self.player.inventory[item_name]
-                                    self.states = [f"{item_name} つかった！"] + self.player.heal(3)
+                                    self.states = [f"{item_name}を つかった！"] + self.player.heal(3)
                                 else:
                                     self.states = [f"このどうぐは つかえない！", "どうする？"]
                             else:
@@ -267,6 +267,16 @@ class Game:
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(state_pos[0], state_pos[1], state_size[0], state_size[1]), 2)
         for i, text in enumerate(self.states):
             self.draw_text(text, state_pos[0] + 12, state_pos[1] + 10 + i * 30, color=WHITE_COLOR)
+            
+    def print_command(self):
+        command_pos = (self.window_size[0] // 3 * 2, self.window_size[1] // 10)
+        command_size = (self.window_size[0] // 4.5, self.window_size[1] // 4)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]))
+        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 4)
+        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 2)
+        for i, text in enumerate(self.command):
+            self.draw_text(text, command_pos[0] + 30, command_pos[1] + 10 + i * 30, color=WHITE_COLOR)
+        self.draw_text('>', command_pos[0] + 12, command_pos[1] + 10 + self.selected_command * 30, color=WHITE_COLOR)
         
     def print_battle(self, enemy):
         # icon
@@ -284,17 +294,7 @@ class Game:
         self.window.blit(image, cell_rect) # 画像をブリット
         
         self.print_status()
-
-        # command
-        command_pos = (self.window_size[0] // 3 * 2, self.window_size[1] // 10)
-        command_size = (self.window_size[0] // 4.5, self.window_size[1] // 4)
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]))
-        pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 4)
-        pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 2)
-        for i, text in enumerate(self.command):
-            self.draw_text(text, command_pos[0] + 30, command_pos[1] + 10 + i * 30, color=WHITE_COLOR)
-        self.draw_text('>', command_pos[0] + 12, command_pos[1] + 10 + self.selected_command * 30, color=WHITE_COLOR)
-            
+        self.print_command()    
         self.print_states()
 
 
@@ -305,13 +305,41 @@ class Game:
         text_rect.topleft = (x, y)
         self.window.blit(text_surface, text_rect)
 
-    def run_game(self):
-        while not self.game_over:
-            self.handle_events()
-            self.print_map()
-            pygame.display.update()
-
-        pygame.quit()
+    def open_inventory(self):
+        command_entered = False
+        self.selected_command = 0
+        self.states = [""]
+        self.command = list(self.player.inventory.keys())
+        self.print_status()
+        self.print_command()
+        self.print_states()
+        pygame.display.update()
+        
+        while not command_entered:
+            for event in pygame.event.get():
+                if event.type == KEYDOWN:
+                    if event.key == K_n:
+                        item_name = self.command[self.selected_command]
+                        if item_name == "ポーション":
+                            command_entered = True
+                            self.player.inventory[item_name] -= 1
+                            if self.player.inventory[item_name] == 0:
+                                del self.player.inventory[item_name]
+                            self.states = [f"{item_name}を つかった！"] + self.player.heal(3)
+                        else:
+                            self.states = [f"このどうぐは つかえない！"]
+                    elif event.key == K_m:
+                        command_entered = True
+                    elif event.key == K_w:
+                        self.selected_command = max(0, self.selected_command - 1)
+                    elif event.key == K_s:
+                        self.selected_command = min(len(self.command)-1, self.selected_command + 1)
+                    self.print_status()
+                    self.print_command()
+                    self.print_states()
+                    pygame.display.update()
+                    if len(self.states) > 1:
+                        self.wait_input()
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -330,6 +358,16 @@ class Game:
                     self.player_move(-1, 0)
                 if event.key == K_d:
                     self.player_move(1, 0)
+                if event.key == K_i:
+                    self.open_inventory()
+                    
+    def run_game(self):
+        while not self.game_over:
+            self.handle_events()
+            self.print_map()
+            pygame.display.update()
+
+        pygame.quit()
 
 game = Game()
 game.run_game()
