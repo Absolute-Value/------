@@ -109,10 +109,11 @@ class Game:
             if self.entity_map[new_y][new_x] > 1:
                 # 敵がいる場合、バトルを開始する
                 self.encounter_enemy(new_x, new_y)
-            self.entity_map[self.player.y][self.player.x] = 0
-            self.player.x = new_x
-            self.player.y = new_y
-            self.entity_map[self.player.y][self.player.x] = 1
+            else:
+                self.player.x = new_x
+                self.player.y = new_y
+                self.entity_map[self.player.y][self.player.x] = 1
+            
         else:
             print("You can't move there . Try again .")
 
