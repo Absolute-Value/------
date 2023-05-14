@@ -8,7 +8,8 @@ BLACK_COLOR = (0, 0, 0)
 WHITE_COLOR = (255, 255, 255)
 
 # ゲーム設定
-EXP_RATE = 1.3
+INIT_EXP = 2
+EXP_RATE = 0.5
 ENEMY_NUM = 5
 INIT_STAGE = (1,2)
 BATTLE_COMMAND = ["こうげき", "じゅもん", "にげる", "どうぐ"]
@@ -59,6 +60,11 @@ TOOL_INFO = {
     "やくそう":["HPを すこし かいふく"],
     "ポーション":["HPを かいふく"],
     "カギ":["どこかを あけることができる"],
+}
+
+HEAL_INFO = {
+    "やくそう":2,
+    "ポーション":8,
 }
 
 # 画像

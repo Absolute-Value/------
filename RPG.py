@@ -1,5 +1,6 @@
 import random
 import pygame
+import pickle
 from pygame.locals import *
 from entities import *
 from player import Player
@@ -112,9 +113,6 @@ class Game:
                 self.entity_map[self.player.y][self.player.x] = 0
                 self.player.x, self.player.y = new_x, new_y
                 self.entity_map[self.player.y][self.player.x] = 1
-            
-        else:
-            print("You can't move there . Try again .")
 
     def battle(self, enemy):
         self.states = [f"{enemy.name}が あらわれた！", "どうする？"]
@@ -137,7 +135,7 @@ class Game:
                                     self.player.inventory[item_name] -= 1
                                     if self.player.inventory[item_name] == 0:
                                         del self.player.inventory[item_name]
-                                    self.states = [f"{item_name}を つかった！"] + self.player.heal(2 if item_name == "やくそう" else 5)
+                                    self.states = [f"{item_name}を つかった！"] + self.player.heal(HEAL_INFO[item_name])
                                 else:
                                     self.states = [f"ここでは つかえない！", "どうする？"]
                             else:
@@ -187,6 +185,7 @@ class Game:
         if self.player.health <= 0:
             self.game_over = True
             self.states.extend([f"プレイヤーは しんでしまった！"])
+            print("GAME OVER")
             self.print_battle(enemy)
             self.wait_input()
         elif enemy.health > 0:
@@ -304,7 +303,7 @@ class Game:
                             self.player.inventory[item_name] -= 1
                             if self.player.inventory[item_name] == 0:
                                 del self.player.inventory[item_name]
-                            self.states = [f"{item_name}を つかった！"] + self.player.heal(2 if item_name == "やくそう" else 5)
+                            self.states = [f"{item_name}を つかった！"] + self.player.heal(HEAL_INFO[item_name])
                             self.print_stats_and_command()
                             self.wait_input()
                         else:
@@ -338,6 +337,15 @@ class Game:
                     self.player_move(1, 0)
                 if event.key == K_i:
                     self.open_inventory()
+                if event.key == K_F1:
+                    with open("player.save", "wb") as f:
+                        pickle.dump(self.player, f)
+                    print("saved")
+                if event.key == K_F2:
+                    with open("player.save", "rb") as f:
+                        self.player = pickle.load(f)
+                    self.player_move(0, 0)
+                    print("loaded")
                     
     def run_game(self):
         while not self.game_over:

@@ -1,4 +1,4 @@
-from define import EXP_RATE
+from define import INIT_EXP, EXP_RATE
 class Player:
     def __init__(self, x:int=5, y:int=5):
         self.x = x
@@ -10,7 +10,7 @@ class Player:
         self.attack_power = 1
         self.level = 1
         self.experience = 0
-        self.experience_to_level_up = 2
+        self.experience_to_level_up = INIT_EXP
         self.inventory = {"やくそう":1}
 
     def attack(self, enemy):
@@ -37,10 +37,10 @@ class Player:
         self.max_mp += 1
         self.mp = min(self.max_mp, self.mp+10)
         if self.level % 2 == 0:
-            status.append(f"AT ({self.max_health} -> {self.max_health+1})")
+            status.append(f"AT ({self.attack_power} -> {self.attack_power+1})")
             self.attack_power += 1
         
         self.experience -= self.experience_to_level_up
-        self.experience_to_level_up += int(EXP_RATE*self.experience_to_level_up)
+        self.experience_to_level_up = int(EXP_RATE * INIT_EXP * (self.level ** 2))
         
         return status
