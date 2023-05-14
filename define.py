@@ -8,6 +8,7 @@ BLACK_COLOR = (0, 0, 0)
 WHITE_COLOR = (255, 255, 255)
 
 # ゲーム設定
+EXP_RATE = 1.3
 ENEMY_NUM = 5
 INIT_STAGE = (1,2)
 BATTLE_COMMAND = ["こうげき", "じゅもん", "にげる", "どうぐ"]

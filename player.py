@@ -1,3 +1,4 @@
+from define import EXP_RATE
 class Player:
     def __init__(self, x:int=5, y:int=5):
         self.x = x
@@ -40,6 +41,6 @@ class Player:
             self.attack_power += 1
         
         self.experience -= self.experience_to_level_up
-        self.experience_to_level_up += int(1.5*self.experience_to_level_up)
+        self.experience_to_level_up += int(EXP_RATE*self.experience_to_level_up)
         
         return status
