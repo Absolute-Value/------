@@ -2,8 +2,8 @@
 
 ![](images/hero.png)
 
-pythonを用いてRPGゲームを実装しました。  
-(ベースはChatCPTで作りました)
+pythonを用いてRPGゲームを実装しました．  
+ChatCPTで修正を繰り返して作ろうと思っていましたが，人力の方が効率が良いので自分の手で修正しています．
 
 [![Python][Python.js]][Python.link]
 
