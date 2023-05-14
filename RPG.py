@@ -162,8 +162,7 @@ class Game:
                                 self.states = ["にげられなかった！"]
                                 command_entered = True
                             else:
-                                command_list = ["こうげき", "じゅもん", "にげる", "どうぐ"]
-                                self.states = [f"{command_list[self.command]}は まだつかえない！", "どうする？"]
+                                self.states = [f"{BATTLE_COMMAND[self.command]}は まだつかえない！", "どうする？"]
                         elif event.key == K_w:
                             self.command = max(0, self.command - 1)
                         elif event.key == K_s:
@@ -181,7 +180,6 @@ class Game:
                     self.wait_input()
                     self.states = ["どうする？"]
 
-        print("now here")
         if self.player.health <= 0:
             self.game_over = True
             self.states.extend([f"プレイヤーは しんでしまった！"])
@@ -267,13 +265,7 @@ class Game:
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]))
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(command_pos[0], command_pos[1], command_size[0], command_size[1]), 2)
-        status_text = [
-            "こうげき",
-            "じゅもん",
-            "にげる",
-            "どうぐ"
-        ]
-        for i, text in enumerate(status_text):
+        for i, text in enumerate(BATTLE_COMMAND):
             self.draw_text(text, command_pos[0] + 30, command_pos[1] + 10 + i * 30, color=WHITE_COLOR)
         self.draw_text('>', command_pos[0] + 12, command_pos[1] + 10 + self.command * 30, color=WHITE_COLOR)
             
