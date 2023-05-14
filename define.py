@@ -1,3 +1,5 @@
+import pygame
+
 # 外観
 CELL_SIZE = 60
 
@@ -50,3 +52,27 @@ MAP = {
         [4,4,4,4,4,4,4,4,4,4,4,4],
     ]
 }
+
+# どうぐの説明
+TOOL_INFO = {
+    "ポーション":["HPを 3かいふく"],
+    "カギ":["どこかを あけることができる"],
+}
+
+# 画像
+# 使用する画像を読み込んでおく
+def load_image(img_path):
+    return pygame.transform.scale(pygame.image.load(img_path), (CELL_SIZE, CELL_SIZE))# 画像を読み込みリサイズ
+
+IMAGES = {
+    0: load_image("images/land.png"),
+    1: load_image("images/tree.png"),
+    4: load_image("images/sea.png"),
+    "player": load_image("images/player.png"),
+    "やくそう": load_image("images/herb.png"), 
+    "ポーション": load_image("images/potion.png"), 
+    "Bone": load_image("images/enemy.png"),
+    "BoneKing": load_image("images/boss.png"),
+    "カギ": load_image("images/key.png"),
+}
+

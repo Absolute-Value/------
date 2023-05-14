@@ -20,16 +20,6 @@ class Game:
         # ゲームウィンドウの作成
         self.window = pygame.display.set_mode((self.window_size[0], self.window_size[1]))
         pygame.display.set_caption('RPG Game')
-
-        # 使用する画像を読み込んでおく
-        self.potion_image = pygame.transform.scale(pygame.image.load("images/potion.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
-        self.land_image = pygame.transform.scale(pygame.image.load("images/land.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
-        self.tree_image = pygame.transform.scale(pygame.image.load("images/tree.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
-        self.sea_image = pygame.transform.scale(pygame.image.load("images/sea.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
-        self.player_image = pygame.transform.scale(pygame.image.load("images/player.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
-        self.enemy_image = pygame.transform.scale(pygame.image.load("images/enemy.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
-        self.boss_image = pygame.transform.scale(pygame.image.load("images/boss.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
-        self.key_image = pygame.transform.scale(pygame.image.load("images/key.png"), (CELL_SIZE, CELL_SIZE)) # 画像を読み込みリサイズ
         
     def init_entity_map(self):
         self.entity_map = [[0 for _ in range(self.map_size[0])] for _ in range(self.map_size[1])]
@@ -66,26 +56,15 @@ class Game:
         for y, map_row in enumerate(self.map):
             for x, map_tile in enumerate(map_row):
                 cell_rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-                if map_tile == 4: # 海だったら
-                    self.window.blit(self.sea_image, cell_rect) # 画像をブリット
-                else:
-                    self.window.blit(self.land_image, cell_rect) # 画像をブリット
-                    if map_tile == 1: # 木だったら
-                        self.window.blit(self.tree_image, cell_rect) # 画像をブリット
-        
+                self.window.blit(IMAGES[0], cell_rect) # 画像をブリット
+                self.window.blit(IMAGES[map_tile], cell_rect) # 画像をブリット
+                
         cell_rect = pygame.Rect(self.player.x * CELL_SIZE, self.player.y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-        self.window.blit(self.player_image, cell_rect) # プレイヤー画像をブリット
+        self.window.blit(IMAGES["player"], cell_rect) # プレイヤー画像をブリット
         
         for entity in self.entities:
             cell_rect = pygame.Rect(entity.x * CELL_SIZE, entity.y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-            if entity.name == "ポーション":
-                self.window.blit(self.potion_image, cell_rect) # 画像をブリット
-            elif entity.name == "カギ":
-                self.window.blit(self.key_image, cell_rect) # 画像をブリット
-            elif entity.name == "BoneKing":
-                self.window.blit(self.boss_image, cell_rect) # 画像をブリット
-            else:
-                self.window.blit(self.enemy_image, cell_rect) # 画像をブリット
+            self.window.blit(IMAGES[entity.name], cell_rect) # 画像をブリット
 
     def player_move(self, dx, dy):
         new_x = self.player.x + dx
@@ -181,7 +160,7 @@ class Game:
                                     else:
                                         self.command = list(self.player.inventory.keys())
                                         self.selected_command = 0
-                                        self.states = [f"{self.player.inventory[self.command[self.selected_command]]}こ"]
+                                        self.states = [f"しょじ {self.player.inventory[self.command[self.selected_command]]:3d}こ"] + TOOL_INFO[self.command[self.selected_command]]
                                         open_inventory = True
                         elif event.key == K_m:
                             self.command = BATTLE_COMMAND
@@ -189,10 +168,10 @@ class Game:
                             open_inventory = False
                         elif event.key == K_w:
                             self.selected_command = max(0, self.selected_command - 1)
-                            if open_inventory : self.states = [f"{self.player.inventory[self.command[self.selected_command]]}こ"]
+                            if open_inventory : self.states = [f"しょじ {self.player.inventory[self.command[self.selected_command]]:3d}こ"] + TOOL_INFO[self.command[self.selected_command]]
                         elif event.key == K_s:
                             self.selected_command = min(len(self.command)-1, self.selected_command + 1)
-                            if open_inventory : self.states = [f"{self.player.inventory[self.command[self.selected_command]]}こ"]
+                            if open_inventory : self.states = [f"しょじ {self.player.inventory[self.command[self.selected_command]]:3d}こ"] + TOOL_INFO[self.command[self.selected_command]]
                             
                         self.print_battle(enemy)
                             
@@ -285,10 +264,7 @@ class Game:
         pygame.draw.rect(self.window, WHITE_COLOR, pygame.Rect(icon_pos[0], icon_pos[1], icon_size[0], icon_size[1]), 4)
         pygame.draw.rect(self.window, BLACK_COLOR, pygame.Rect(icon_pos[0], icon_pos[1], icon_size[0], icon_size[1]), 2)
         cell_rect = pygame.Rect(icon_pos[0]+5, icon_pos[1]+5, icon_size[0], icon_size[1])
-        if enemy.name == "BoneKing":
-            image = pygame.transform.scale(self.boss_image, (icon_size[0]-10, icon_size[1]-10)) # 画像リサイズ
-        else:
-            image = pygame.transform.scale(self.enemy_image, (icon_size[0]-10, icon_size[1]-10)) # 画像リサイズ
+        image = pygame.transform.scale(IMAGES[enemy.name], (icon_size[0]-10, icon_size[1]-10)) # 画像リサイズ
             
         self.window.blit(image, cell_rect) # 画像をブリット
         
@@ -311,7 +287,7 @@ class Game:
         command_entered = False
         self.command = list(self.player.inventory.keys())
         self.selected_command = 0
-        self.states = [f"{self.player.inventory[self.command[self.selected_command]]}こ"]
+        self.states = [f"しょじ {self.player.inventory[self.command[self.selected_command]]:3d}こ"] + TOOL_INFO[self.command[self.selected_command]]
         self.print_stats_and_command()
         
         while not command_entered:
@@ -331,13 +307,11 @@ class Game:
                         command_entered = True
                     elif event.key == K_w:
                         self.selected_command = max(0, self.selected_command - 1)
-                        self.states = [f"{self.player.inventory[self.command[self.selected_command]]}こ"]
+                        self.states = [f"しょじ {self.player.inventory[self.command[self.selected_command]]:3d}こ"] + TOOL_INFO[self.command[self.selected_command]]
                     elif event.key == K_s:
                         self.selected_command = min(len(self.command)-1, self.selected_command + 1)
-                        self.states = [f"{self.player.inventory[self.command[self.selected_command]]}こ"]
+                        self.states = [f"しょじ {self.player.inventory[self.command[self.selected_command]]:3d}こ"] + TOOL_INFO[self.command[self.selected_command]]
                     self.print_stats_and_command()
-                    if len(self.states) > 1:
-                        self.wait_input()
 
     def handle_events(self):
         for event in pygame.event.get():
