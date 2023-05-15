@@ -1,14 +1,13 @@
 import pygame
 from entities import *
-from define import INIT_STAGE, MAP, CELL_SIZE, IMAGES
+from define import MAP, CELL_SIZE, IMAGES
 
 class Map:
     def __init__(self, player):
-        self.stage = INIT_STAGE
-        self.map = MAP[self.stage]
+        self.player = player
+        self.map = MAP[self.player.stage]
         self.size = (len(self.map[0]), len(self.map))
         self.window_size = [m * CELL_SIZE for m in self.size]
-        self.player = player
  
         pygame.init()
         pygame.display.set_caption('RPG Game')
@@ -18,7 +17,9 @@ class Map:
         self.generate_map_and_entities()
         pygame.display.update()
         
-    def generate_map_and_entities(self):
+    def generate_map_and_entities(self, map_load:bool=False):
+        if map_load:
+            self.map = MAP[self.player.stage]
         self.window_bg = pygame.Surface(self.window_size)
         self.entities = []
         for y, map_row in enumerate(self.map):
@@ -46,9 +47,8 @@ class Map:
         pygame.display.update()
         
     def change_map(self, new_stage):
-        if self.stage != new_stage and new_stage in MAP.keys():
-            self.stage = new_stage
-            self.map = MAP[self.stage]
-            self.generate_map_and_entities()
+        if self.player.stage != new_stage and new_stage in MAP.keys():
+            self.player.stage = new_stage
+            self.generate_map_and_entities(True)
         else:
             self.draw_entities()

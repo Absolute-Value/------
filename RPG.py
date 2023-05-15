@@ -4,7 +4,7 @@ import pickle
 from pygame.locals import *
 from map import Map
 from player import Player
-from define import *
+from define import TOOL_INFO, BATTLE_COMMAND, IMAGES, BLACK_COLOR, WHITE_COLOR, HEAL_INFO
 
 class Game:
     def __init__(self):
@@ -16,19 +16,19 @@ class Game:
     
     def player_move(self, dx, dy):
         new_x, new_y = self.player.x + dx, self.player.y + dy
-        new_stage = self.map.stage
+        new_stage = self.player.stage
         
         if new_x < 0: # 左ステージへの移動
-            new_stage = (self.map.stage[0], self.map.stage[1]-1)
+            new_stage = (self.player.stage[0], self.player.stage[1]-1)
             new_x = self.map.size[0] - 1
         elif new_x == self.map.size[0]: # 右ステージへの移動
-            new_stage = (self.map.stage[0], self.map.stage[1]+1)
+            new_stage = (self.player.stage[0], self.player.stage[1]+1)
             new_x = 0
         elif (new_y < 0): # 上ステージへの移動
-            new_stage = (self.map.stage[0]-1, self.map.stage[1])
+            new_stage = (self.player.stage[0]-1, self.player.stage[1])
             new_y = self.map.size[1] - 1
         elif (new_y == self.map.size[1]): # 下ステージへの移動
-            new_stage = (self.map.stage[0]+1, self.map.stage[1])
+            new_stage = (self.player.stage[0]+1, self.player.stage[1])
             new_y = 0
         elif (self.map.map[new_y][new_x] > 0 and self.map.map[new_y][new_x] < 4):
             return
@@ -258,7 +258,6 @@ class Game:
                 self.game_over = True
 
             if event.type == KEYDOWN:
-                pygame.event.clear()
                 if event.key == K_ESCAPE:
                     self.game_over = True
                 if event.key == K_w:
@@ -278,7 +277,8 @@ class Game:
                 if event.key == K_F2:
                     with open("player.save", "rb") as f:
                         self.player = pickle.load(f)
-                    self.player_move(0, 0)
+                    self.map.player = self.player
+                    self.map.generate_map_and_entities(True)
                     print("loaded")
                     
     def run_game(self):
