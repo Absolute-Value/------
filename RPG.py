@@ -2,99 +2,41 @@ import random
 import pygame
 import pickle
 from pygame.locals import *
-from entities import *
+from map import Map
 from player import Player
 from define import *
 
 class Game:
     def __init__(self):
-        self.stage = INIT_STAGE
-        self.map = MAP[self.stage]
-        self.map_size = (len(self.map[0]), len(self.map))
         self.game_over:bool = False
         self.player = Player()
-        self.init_entity_map()
-        self.generate_entities()
-        
-        self.window_size = [m * CELL_SIZE for m in self.map_size]
-        pygame.init()
-        # ゲームウィンドウの作成
-        self.window = pygame.display.set_mode((self.window_size[0], self.window_size[1]))
-        pygame.display.set_caption('RPG Game')
-        
-    def init_entity_map(self):
-        self.entity_map = [[0 for _ in range(self.map_size[0])] for _ in range(self.map_size[1])]
-        self.entity_map[self.player.y][self.player.x] = 1
-        
-    def update_entity_map(self):
-        for i, entity in enumerate(self.entities):
-            self.entity_map[entity.y][entity.x] = i + 2
-        
-    def get_random_empty_position(self):
-        while True:
-            x = random.randint(0, self.map_size[0] - 1)
-            y = random.randint(0, self.map_size[1] - 1)
-            if self.entity_map[y][x] == 0 and self.map[y][x] == 0:
-                return x, y
-            
-    def generate_entities(self):
-        self.entities = []
-        bias = 2
-        if self.stage == (2,2):
-            self.entities.append(Boss(5, 1))
-            self.entity_map[1][5] = bias
-            bias += 1
-        if self.stage == (1,2):
-            self.entities.append(Entity(5, 3, "カギ"))
-            self.entity_map[3][5] = bias
-            bias += 1
-        for i in range(ENEMY_NUM):
-            x, y = self.get_random_empty_position()
-            self.entities.append(Enemy(x, y)) # 通常の敵のHP: 3, 攻撃力: 1
-            self.entity_map[y][x] = i + bias
-
-    def print_map(self):
-        for y, map_row in enumerate(self.map):
-            for x, map_tile in enumerate(map_row):
-                cell_rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-                self.window.blit(IMAGES[0], cell_rect) # 画像をブリット
-                self.window.blit(IMAGES[map_tile], cell_rect) # 画像をブリット
-                
-        cell_rect = pygame.Rect(self.player.x * CELL_SIZE, self.player.y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-        self.window.blit(IMAGES["player"], cell_rect) # プレイヤー画像をブリット
-        
-        for entity in self.entities:
-            cell_rect = pygame.Rect(entity.x * CELL_SIZE, entity.y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-            self.window.blit(IMAGES[entity.name], cell_rect) # 画像をブリット
-
-    def search_map_and_make_stage(self, new_stage=(1,1), x=None, y=None):
-        if new_stage in MAP.keys():
-            self.stage = new_stage
-            self.map = MAP[self.stage]
-            self.player.x = x
-            self.player.y = y
-            self.init_entity_map()
-            self.generate_entities()
-        
+        self.map = Map(self.player)
+        self.window_size = self.map.window_size
+        self.window = self.map.window
+    
     def player_move(self, dx, dy):
-        new_x = self.player.x + dx
-        new_y = self.player.y + dy
-
-        if (new_x < 0): # 左ステージへの移動
-            self.search_map_and_make_stage(new_stage = (self.stage[0], self.stage[1]-1), x = self.map_size[0]-1, y = new_y)
-        elif (new_x == self.map_size[0]): # 右ステージへの移動
-            self.search_map_and_make_stage(new_stage = (self.stage[0], self.stage[1]+1), x = 0, y = new_y)
+        new_x, new_y = self.player.x + dx, self.player.y + dy
+        new_stage = self.map.stage
+        
+        if new_x < 0: # 左ステージへの移動
+            new_stage = (self.map.stage[0], self.map.stage[1]-1)
+            new_x = self.map.size[0] - 1
+        elif new_x == self.map.size[0]: # 右ステージへの移動
+            new_stage = (self.map.stage[0], self.map.stage[1]+1)
+            new_x = 0
         elif (new_y < 0): # 上ステージへの移動
-            self.search_map_and_make_stage(new_stage = (self.stage[0]-1, self.stage[1]), y = self.map_size[1] - 1, x = new_x)
-        elif (new_y == self.map_size[1]): # 下ステージへの移動
-            self.search_map_and_make_stage(new_stage = (self.stage[0]+1, self.stage[1]), y = 0, x = new_x)
-        elif (new_x >= 0 and new_x < self.map_size[0] and new_y >= 0 and new_y < self.map_size[1] and (self.map[new_y][new_x] == 0)):
-            target = self.entity_map[new_y][new_x]
-            if target > 1:
-                entity = self.entities[target-2]
+            new_stage = (self.map.stage[0]-1, self.map.stage[1])
+            new_y = self.map.size[1] - 1
+        elif (new_y == self.map.size[1]): # 下ステージへの移動
+            new_stage = (self.map.stage[0]+1, self.map.stage[1])
+            new_y = 0
+        elif (self.map.map[new_y][new_x] > 0 and self.map.map[new_y][new_x] < 4):
+            return
+        for entity in self.map.entities:
+            if entity.x == new_x and entity.y == new_y:
                 if entity.name in TOOL_INFO.keys():
                     self.states = [f"{entity.name}を てにいれた！"]
-                    self.entities.remove(entity)
+                    self.map.entities.remove(entity)
                     if entity.name == "カギ":
                         self.player.inventory["カギ"] = 1
                     else:
@@ -105,19 +47,16 @@ class Game:
                             
                     self.command = list(self.player.inventory.keys())
                     self.selected_command = 0
-                    self.print_map()
                     self.print_stats_and_command()
                     self.wait_input()
-                    
-                    self.init_entity_map()
-                    self.update_entity_map()
+                    self.map.draw_entities()
+                    return
                     
                 else: # 移動先に敵がいる場合、バトルを開始する
                     self.battle(entity)
-            else:
-                self.entity_map[self.player.y][self.player.x] = 0
-                self.player.x, self.player.y = new_x, new_y
-                self.entity_map[self.player.y][self.player.x] = 1
+                    return
+        self.player.x, self.player.y = new_x, new_y
+        self.map.change_map(new_stage)
 
     def battle(self, enemy):
         self.states = [f"{enemy.name}が あらわれた！", "どうする？"]
@@ -197,26 +136,22 @@ class Game:
             self.print_battle(enemy)
             self.wait_input()
         else:
-            self.entities.remove(enemy)
+            self.map.entities.remove(enemy)
             self.states.append(f"{enemy.name}を たおした！")
             self.states.extend(self.player.gain_experience(enemy.exp))
             if self.player.experience >= self.player.experience_to_level_up:
-                self.print_map()
                 self.print_battle(enemy)
                 self.wait_input()
                 self.states = self.player.level_up()
             
             entity = enemy.drop()
             if entity:
-                self.entities.append(entity)
+                self.map.entities.append(entity)
                 self.states.append(f"{enemy.name}は {entity.name}を おとした")
-
-            self.print_map()
+                self.map.draw_entities()
             self.print_battle(enemy)
             self.wait_input()
-            
-            self.init_entity_map()
-            self.update_entity_map()
+        self.map.draw_entities()
             
     def wait_input(self):
         command_entered = False
@@ -299,17 +234,23 @@ class Game:
                             self.states = [f"{item_name}を つかった！"] + self.player.heal(HEAL_INFO[item_name])
                             self.print_stats_and_command()
                             self.wait_input()
+                            self.map.draw_entities()
                         else:
                             self.states = [f"ここでは つかえない！"]
+                            self.print_stats_and_command()
+                            self.wait_input()
+                        
                     elif event.key == K_m:
                         command_entered = True
+                        self.map.draw_entities()
                     elif event.key == K_w and len(self.player.inventory) > 0:
                         self.selected_command = max(0, self.selected_command - 1)
                         self.states = [f"しょじ {self.player.inventory[self.command[self.selected_command]]:3d}こ"] + TOOL_INFO[self.command[self.selected_command]]
+                        self.print_stats_and_command()
                     elif event.key == K_s and len(self.player.inventory) > 0:
                         self.selected_command = min(len(self.command)-1, self.selected_command + 1)
                         self.states = [f"しょじ {self.player.inventory[self.command[self.selected_command]]:3d}こ"] + TOOL_INFO[self.command[self.selected_command]]
-                    self.print_stats_and_command()
+                        self.print_stats_and_command()
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -343,8 +284,6 @@ class Game:
     def run_game(self):
         while not self.game_over:
             self.handle_events()
-            self.print_map()
-            pygame.display.update()
 
         pygame.quit()
 
