@@ -1,8 +1,8 @@
-from define import INIT_EXP, EXP_RATE
+from define import INIT_POS, INIT_EXP, EXP_RATE
+
 class Player:
-    def __init__(self, x:int=5, y:int=5):
-        self.x:int = x
-        self.y:int = y
+    def __init__(self):
+        self.x, self.y = INIT_POS
         self.max_health:int = 5
         self.health:int = self.max_health
         self.mp:int = 5

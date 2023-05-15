@@ -40,11 +40,11 @@ class Game:
     def generate_entities(self):
         self.entities = []
         bias = 2
-        if self.stage == (1,2):
-            self.entities.append(Boss(10, 5))
-            self.entity_map[5][10] = bias
+        if self.stage == (2,2):
+            self.entities.append(Boss(5, 1))
+            self.entity_map[1][5] = bias
             bias += 1
-        if self.stage == (1,3):
+        if self.stage == (1,2):
             self.entities.append(Entity(5, 3, "カギ"))
             self.entity_map[3][5] = bias
             bias += 1
@@ -67,22 +67,27 @@ class Game:
             cell_rect = pygame.Rect(entity.x * CELL_SIZE, entity.y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
             self.window.blit(IMAGES[entity.name], cell_rect) # 画像をブリット
 
+    def search_map_and_make_stage(self, new_stage=(1,1), x=None, y=None):
+        if new_stage in MAP.keys():
+            self.stage = new_stage
+            self.map = MAP[self.stage]
+            self.player.x = x
+            self.player.y = y
+            self.init_entity_map()
+            self.generate_entities()
+        
     def player_move(self, dx, dy):
         new_x = self.player.x + dx
         new_y = self.player.y + dy
 
-        if (new_x < 0 and self.stage[1] > 1): # 左ステージへの移動
-            self.stage = (self.stage[0], self.stage[1]-1)
-            self.map = MAP[self.stage]
-            self.player.x = self.map_size[0] - 1
-            self.init_entity_map()
-            self.generate_entities()
-        elif (new_x == self.map_size[0] and self.stage[1] < len(MAP)): # 右ステージへの移動
-            self.stage = (self.stage[0], self.stage[1]+1)
-            self.map = MAP[self.stage]
-            self.player.x = 0
-            self.init_entity_map()
-            self.generate_entities()
+        if (new_x < 0): # 左ステージへの移動
+            self.search_map_and_make_stage(new_stage = (self.stage[0], self.stage[1]-1), x = self.map_size[0]-1, y = new_y)
+        elif (new_x == self.map_size[0]): # 右ステージへの移動
+            self.search_map_and_make_stage(new_stage = (self.stage[0], self.stage[1]+1), x = 0, y = new_y)
+        elif (new_y < 0): # 上ステージへの移動
+            self.search_map_and_make_stage(new_stage = (self.stage[0]-1, self.stage[1]), y = self.map_size[1] - 1, x = new_x)
+        elif (new_y == self.map_size[1]): # 下ステージへの移動
+            self.search_map_and_make_stage(new_stage = (self.stage[0]+1, self.stage[1]), y = 0, x = new_x)
         elif (new_x >= 0 and new_x < self.map_size[0] and new_y >= 0 and new_y < self.map_size[1] and (self.map[new_y][new_x] == 0)):
             target = self.entity_map[new_y][new_x]
             if target > 1:

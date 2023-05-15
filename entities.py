@@ -2,8 +2,7 @@ import random
 
 class Entity:
     def __init__(self, x:int, y:int, name:str="None", health:int=1, attack_power:int=1, exp:int=0):
-        self.x:int = x
-        self.y:int = y
+        self.x, self.y = x, y
         self.health:int = health
         self.name:str = name
         self.attack_power:int = attack_power
