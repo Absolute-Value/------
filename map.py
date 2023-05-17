@@ -29,10 +29,12 @@ class Map:
                 if map_tile < 4:
                     self.window_bg.blit(IMAGES[map_tile], cell_rect) # 画像をブリット
                 else:
-                    if map_tile == 4:
-                        self.entities.append(Enemy(x, y)) # 通常の敵のHP: 3, 攻撃力: 1
-                    elif map_tile == 5:
-                        self.entities.append(Boss(x, y)) # Boss
+                    if map_tile == 4: # スライム
+                        self.entities.append(Enemy(x, y, name="Slime", health=2, attack_power=1, exp=1, escape_rate=0.95, drop_items={"やくそう":0.2}))
+                    if map_tile == 5:
+                        self.entities.append(Enemy(x, y, name="Bone", health=6, attack_power=3, exp=4, escape_rate=0.8, drop_items={"やくそう":0.4}))
+                    elif map_tile == 6:
+                        self.entities.append(Enemy(x, y, name="BoneKing", health=20, attack_power=5, exp=8, escape_rate=0, drop_items={"ポーション":0.5}))
                     elif map_tile == 7:
                         self.entities.append(Entity(x,y,name="カギ"))
         self.draw_entities()
