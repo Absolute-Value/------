@@ -3,6 +3,7 @@ from define import INIT_POS, INIT_STAGE, INIT_EXP, EXP_RATE
 class Player:
     def __init__(self):
         self.x, self.y = INIT_POS
+        self.dx, self.dy = (0,1)
         self.stage = INIT_STAGE
         self.max_health:int = 5
         self.health:int = self.max_health
@@ -13,7 +14,7 @@ class Player:
         self.experience:int = 0
         self.experience_to_level_up:int = INIT_EXP
         self.inventory:dict = {"やくそう":1}
-
+        
     def attack(self, enemy):
         enemy.health -= self.attack_power
         return ["プレイヤーの こうげき！", f"{enemy.name}に{self.attack_power}ダメージ"]

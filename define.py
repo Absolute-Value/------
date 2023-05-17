@@ -1,5 +1,3 @@
-import pygame
-
 # 外観
 CELL_SIZE = 60
 
@@ -80,21 +78,17 @@ HEAL_INFO = {
     "ポーション":8,
 }
 
-# 画像
-# 使用する画像を読み込んでおく
-def load_image(img_path):
-    return pygame.transform.scale(pygame.image.load(img_path), (CELL_SIZE, CELL_SIZE))# 画像を読み込みリサイズ
-
-IMAGES = {
-    0: load_image("images/land.png"),
-    1: load_image("images/tree.png"),
-    2: load_image("images/sea.png"),
-    "player": load_image("images/player.png"),
-    "やくそう": load_image("images/herb.png"), 
-    "ポーション": load_image("images/potion.png"), 
-    "Slime": load_image("images/slime.png"),
-    "Bone": load_image("images/enemy.png"),
-    "BoneKing": load_image("images/boss.png"),
-    "カギ": load_image("images/key.png"),
+# 画像Path
+IMAGE_PATHS = {
+    0: "images/land.png",
+    1: "images/tree.png",
+    2: "images/sea.png",
+    "player": "images/player.png",
+    "やくそう": "images/herb.png", 
+    "ポーション": "images/potion.png", 
+    "Slime": "images/slime.png",
+    "Bone": "images/enemy.png",
+    "BoneKing": "images/boss.png",
+    "カギ": "images/key.png",
 }
 

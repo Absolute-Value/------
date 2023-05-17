@@ -35,6 +35,7 @@ python RPG.py
 
 - 背景などの画像
     - [DOT ILLUST](https://dot-illust.net/)
+    - [ぴぽや](https://pipoya.net/)
 - フォント
     - [「ノスタルドット（M+）」フォント](https://logotype.jp/nosutaru-dot.html)
 

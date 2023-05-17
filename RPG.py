@@ -4,7 +4,7 @@ import pickle
 from pygame.locals import *
 from map import Map
 from player import Player
-from define import TOOL_INFO, BATTLE_COMMAND, IMAGES, BLACK_COLOR, WHITE_COLOR, HEAL_INFO
+from define import TOOL_INFO, BATTLE_COMMAND, BLACK_COLOR, WHITE_COLOR, HEAL_INFO
 
 class Game:
     def __init__(self):
@@ -15,6 +15,8 @@ class Game:
         self.window = self.map.window
     
     def player_move(self, dx, dy):
+        self.player.dx = dx
+        self.player.dy = dy
         new_x, new_y = self.player.x + dx, self.player.y + dy
         new_stage = self.player.stage
         
@@ -59,6 +61,7 @@ class Game:
         self.map.change_map(new_stage)
 
     def battle(self, enemy):
+        self.map.draw_entities()
         self.states = [f"{enemy.name}が あらわれた！", "どうする？"]
         while self.player.health > 0 and enemy.health > 0:
             self.command = BATTLE_COMMAND
@@ -193,7 +196,7 @@ class Game:
         self.draw_bg_rect(pos=icon_pos,size=icon_size)
         
         cell_rect = pygame.Rect(icon_pos[0]+5, icon_pos[1]+5, icon_size[0], icon_size[1])
-        image = pygame.transform.scale(IMAGES[enemy.name], (icon_size[0]-10, icon_size[1]-10)) # 画像リサイズ
+        image = pygame.transform.scale(self.map.image[enemy.name], (icon_size[0]-10, icon_size[1]-10)) # 画像リサイズ
         self.window.blit(image, cell_rect) # 画像をブリット
         
         self.print_stats_and_command()
