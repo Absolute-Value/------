@@ -30,11 +30,11 @@ class Game:
         elif (new_y == self.map.size[1]): # 下ステージへの移動
             new_stage = (self.player.stage[0]+1, self.player.stage[1])
             new_y = 0
-        elif (self.map.map[new_y][new_x] > 0 and self.map.map[new_y][new_x] < 4):
+        elif self.map.map[new_y][new_x] in (1, 2, 3):
             return
         for entity in self.map.entities:
             if entity.x == new_x and entity.y == new_y:
-                if entity.name in TOOL_INFO.keys():
+                if entity.name in TOOL_INFO:
                     self.states = [f"{entity.name}を てにいれた！"]
                     self.map.entities.remove(entity)
                     if entity.name == "カギ":
