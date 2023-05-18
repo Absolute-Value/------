@@ -11,10 +11,10 @@ class Map:
         self.window_size = [m * CELL_SIZE for m in self.size]
         self.image:dict = {k:load_image(v) for k, v in IMAGE_PATHS.items() if k != "player"}
         self.image.update({
-            "DOWN":load_image(IMAGE_PATHS["player"], (32,0,32,32)),
-            "LEFT":load_image(IMAGE_PATHS["player"], (32,32,32,32)),
-            "RIGHT":load_image(IMAGE_PATHS["player"], (32,64,32,32)),
-            "UP":load_image(IMAGE_PATHS["player"], (32,96,32,32)),
+            11:load_image(IMAGE_PATHS["player"], (32,0,32,32)),
+            8:load_image(IMAGE_PATHS["player"], (32,32,32,32)),
+            12:load_image(IMAGE_PATHS["player"], (32,64,32,32)),
+            9:load_image(IMAGE_PATHS["player"], (32,96,32,32)),
         })
  
         pygame.init()
@@ -34,7 +34,9 @@ class Map:
             for x, map_tile in enumerate(map_row):
                 cell_rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
                 self.window_bg.blit(self.image[0], cell_rect) # 画像をブリット
-                if map_tile < 4:
+                if map_tile == 2: # 水だったら
+                    self.window_bg.blit(self.image[map_tile],cell_rect)
+                elif map_tile < 4:
                     self.window_bg.blit(self.image[map_tile], cell_rect) # 画像をブリット
                 else:
                     if map_tile == 4: # スライム
@@ -56,15 +58,9 @@ class Map:
             self.window.blit(self.image[entity.name], cell_rect)
             
         player_cell = pygame.Rect(self.player.x * CELL_SIZE, self.player.y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-        if self.player.dx > 0:
-            self.window.blit(self.image["RIGHT"], player_cell)
-        else:
-            if self.player.dy > 0:
-                self.window.blit(self.image["DOWN"], player_cell)
-            elif self.player.dy < 0:
-                self.window.blit(self.image["UP"], player_cell)
-            else:
-                self.window.blit(self.image["LEFT"], player_cell)
+        choise = 2 * self.player.dx + self.player.dy + 10
+        if choise != 0:
+            self.window.blit(self.image[choise], player_cell)
         
         pygame.display.update()
         
