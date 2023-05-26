@@ -16,6 +16,8 @@ class Map:
             12:load_image(IMAGE_PATHS["player"], (32,64,32,32)),
             9:load_image(IMAGE_PATHS["player"], (32,96,32,32)),
         })
+        self.image[0] = load_image("images/grass1.png", (0, 64, 16, 16))
+        self.image[2] = load_image("images/water1.png", (0, 64, 16, 16))
  
         pygame.init()
         pygame.display.set_caption('RPG Game')
