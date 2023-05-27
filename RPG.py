@@ -263,13 +263,13 @@ class Game:
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
                     self.game_over = True
-                if event.key == K_w:
+                if event.key in [K_w, K_UP]:
                     self.player_move(0, -1)
-                if event.key == K_s:
+                elif event.key in [K_s, K_DOWN]:
                     self.player_move(0, 1)
-                if event.key == K_a:
+                if event.key in [K_a, K_LEFT]:
                     self.player_move(-1, 0)
-                if event.key == K_d:
+                elif event.key in [K_d, K_RIGHT]:
                     self.player_move(1, 0)
                 if event.key == K_i:
                     self.open_inventory()
