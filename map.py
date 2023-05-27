@@ -17,6 +17,7 @@ class Map:
             9:load_image(IMAGE_PATHS["player"], (32,96,32,32)),
         })
         self.image[0] = load_image("images/grass1.png", (0, 64, 16, 16))
+        self.image[1] = load_image("images/world.png", (32, 96, 16, 16))
         self.image[2] = load_image("images/water1.png", (0, 64, 16, 16))
  
         pygame.init()

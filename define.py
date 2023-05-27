@@ -80,7 +80,6 @@ HEAL_INFO = {
 
 # 画像Path
 IMAGE_PATHS = {
-    1: "images/tree.png",
     "player": "images/player.png",
     "やくそう": "images/herb.png", 
     "ポーション": "images/potion.png", 
