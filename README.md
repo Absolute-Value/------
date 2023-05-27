@@ -1,4 +1,4 @@
-# Python RPG
+# Python RPG Game
 
 ![](images/hero.png)
 
@@ -7,20 +7,20 @@ ChatCPTで修正を繰り返して作ろうと思っていましたが，人力�
 
 [![Python][Python.js]][Python.link]
 
-## Installation
+## インストール | Installation
 
 ```console
 pip install pygame
 ```
 
-## Usage
+## 使用方法 | Usage
 
 ```console
 python RPG.py
 
 ```
 
-## 操作方法
+## 操作方法　 | Controls
 | キー | 説明 |
 | --- | --- |
 | w | ↑ |
@@ -31,7 +31,7 @@ python RPG.py
 | m | キャンセル |
 | i | インベントリを開く |
 
-## 使用素材
+## 使用素材 | Materials
 
 - 背景などの画像
     - [DOT ILLUST](https://dot-illust.net/)
