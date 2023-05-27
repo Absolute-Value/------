@@ -20,7 +20,7 @@ python RPG.py
 
 ```
 
-## 操作方法　 | Controls
+## 操作方法 | Controls
 | キー | 説明 |
 | --- | --- |
 | w | ↑ |
